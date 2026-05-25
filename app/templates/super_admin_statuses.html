@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ t('status_manager') }}</h1>
+<div class="grid two">
+  <div class="card">
+    <h2>{{ t('create_status') }}</h2>
+    <form method="post" class="grid one">
+      <label>{{ t('status_name') }}<input name="name" required></label>
+      <button type="submit">{{ t('create_status') }}</button>
+    </form>
+  </div>
+  <div class="card">
+    <h2>{{ t('existing_statuses') }}</h2>
+    <table>
+      <tr><th>{{ t('status') }}</th><th>{{ t('status') }}</th><th>{{ t('action') }}</th></tr>
+      {% for status in statuses %}
+      <tr>
+        <td>{{ status.name }}</td>
+        <td>{{ t('active') if status.is_active else t('disabled') }}</td>
+        <td>
+          <form method="post" action="{{ url_for('toggle_status', status_id=status.id) }}">
+            <button type="submit" class="small {{ 'danger' if status.is_active else '' }}">{{ t('disable') if status.is_active else t('enable') }}</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}

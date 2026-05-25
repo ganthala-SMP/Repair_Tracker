@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="repair-id-display">{{ ticket.ticket_code }}</h1>
+<div class="grid two">
+  <div class="card">
+    <h2>Ticket Info</h2>
+    <div class="info-list">
+      <p><strong>Ticket ID:</strong> {{ ticket.invoice_number }}</p>
+      <p><strong>{{ t('customer') }}:</strong> {{ ticket.customer.name }} / {{ ticket.customer.phone }}</p>
+      <p><strong>Date:</strong> {{ ticket.created_at.strftime('%Y-%m-%d') }}</p>
+      <p><strong>{{ t('status') }}:</strong> {{ ticket.status }}</p>
+      {% if ticket.issue_description %}<p><strong>Note:</strong> {{ ticket.issue_description }}</p>{% endif %}
+    </div>
+    <div class="stack-actions">
+      <a class="button" href="{{ url_for('print_buying_invoice', ticket_id=ticket.id, size='80mm') }}" target="_blank">Print Ticket</a>
+      <a class="button secondary" href="{{ url_for('edit_buying', ticket_id=ticket.id) }}">Edit</a>
+      <form method="post" action="{{ url_for('delete_buying', ticket_id=ticket.id) }}" style="display:inline;">
+        <button type="submit" class="button danger">Delete</button>
+      </form>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Total</h2>
+    <p><strong>Total:</strong> € {{ '%.2f'|format(total) }}</p>
+  </div>
+</div>
+<div class="card">
+  <h2>Items</h2>
+  <div class="table-scroll">
+    <table>
+      <tr><th>Brand</th><th>Model</th><th>GB</th><th>IMEI</th><th>Battery %</th><th>{{ t('serial_number') }}</th><th>Qty</th><th>Amount</th><th>Total</th></tr>
+      {% for item in items %}
+      <tr>
+        <td>{{ item.brand }}</td>
+        <td>{{ item.model }}</td>
+        <td>{{ item.gb }}</td>
+        <td>{{ item.imei }}</td>
+        <td>{% if item.battery %}{{ item.battery }}{% if '%' not in item.battery|string %}%{% endif %}{% endif %}</td>
+        <td>{{ item.serial }}</td>
+        <td>{{ item.qty }}</td>
+        <td>€ {{ '%.2f'|format(item.amount or 0) }}</td>
+        <td>€ {{ '%.2f'|format((item.qty or 1) * (item.amount or 0)) }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+<div class="grid two">
+  <div class="card">
+    <h2>{{ t('update_status') }}</h2>
+    <form method="post" class="grid one">
+      <input type="hidden" name="action" value="update_status">
+      <label>{{ t('status') }}
+        <select name="status">{% for status in statuses %}<option value="{{ status }}" {% if ticket.status == status %}selected{% endif %}>{{ status }}</option>{% endfor %}</select>
+      </label>
+      <button type="submit">Save Status</button>
+    </form>
+  </div>
+  <div class="card">
+    <h2>{{ t('add_payment') }}</h2>
+    <form method="post" class="grid one">
+      <input type="hidden" name="action" value="add_payment">
+      <input type="hidden" name="payment_id" id="gsm-payment-id">
+      <label>{{ t('amount') }}<input name="amount" id="gsm-payment-amount" type="number" step="0.01"></label>
+      <label>{{ t('method') }}
+        <select name="method" id="gsm-payment-method">
+          {% for method in payment_methods %}<option value="{{ method }}">{{ method }}</option>{% endfor %}
+        </select>
+      </label>
+      <button type="submit" id="gsm-payment-submit">Record Payment</button>
+    </form>
+    <hr>
+    <h3>Recorded Payments</h3>
+    {% for p in ticket.payments %}
+    <div class="payment-row">
+      <span>{{ p.created_at.strftime('%Y-%m-%d') if p.created_at else '' }} — € {{ '%.2f'|format(p.amount) }} ({{ p.method }})</span>
+      <div class="stack-actions">
+        <button type="button" class="button secondary small gsm-edit-payment-btn" data-id="{{ p.id }}" data-amount="{{ p.amount }}" data-method="{{ p.method }}">Edit</button>
+        <form method="post"><input type="hidden" name="action" value="delete_payment"><input type="hidden" name="payment_id" value="{{ p.id }}"><button class="button danger small">Delete</button></form>
+      </div>
+    </div>
+    {% else %}
+      <p class="subtext">No payments recorded yet.</p>
+    {% endfor %}
+  </div>
+</div>
+<script>
+document.addEventListener('click', function(e){
+  const btn = e.target.closest('.gsm-edit-payment-btn');
+  if(btn){
+    document.getElementById('gsm-payment-id').value = btn.dataset.id;
+    document.getElementById('gsm-payment-amount').value = btn.dataset.amount;
+    document.getElementById('gsm-payment-method').value = btn.dataset.method;
+    document.getElementById('gsm-payment-submit').textContent = 'Update Payment';
+  }
+});
+</script>
+{% endblock %}

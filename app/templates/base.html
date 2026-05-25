@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="{{ current_lang }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title or platform_name }}</title>
+  <style>
+    :root {
+      --primary: {{ app_settings.theme_primary if app_settings else '#38bdf8' }};
+      --accent: {{ app_settings.theme_accent if app_settings else '#0f172a' }};
+    }
+  </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+  {% if app_settings and app_settings.support_custom_css %}<style>{{ app_settings.support_custom_css|safe }}</style>{% endif %}
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      {% if active_company and active_company.logo_path %}
+      <img src="{{ url_for('static', filename=active_company.logo_path) }}" alt="logo">
+      {% else %}
+      <img src="{{ url_for('static', filename='img/logo.png') }}" alt="logo">
+      {% endif %}
+      <div>
+        <strong>{{ active_company.name if active_company else platform_name }}</strong>
+        <div class="subtext">{{ current_user.role if current_user.is_authenticated else platform_name }}</div>
+      </div>
+    </div>
+    {% if current_user.is_authenticated %}
+    <nav>
+      {% if current_user.is_super_admin %}
+        <a href="{{ url_for('super_admin_dashboard') }}">{{ label_or_t(app_settings.menu_dashboard if app_settings else None, 'Dashboard', 'dashboard') }}</a>
+        <a href="{{ url_for('super_admin_companies') }}">{{ label_or_t(app_settings.menu_companies if app_settings else None, 'Companies', 'companies') }}</a>
+        <a href="{{ url_for('super_admin_statuses') }}">{{ label_or_t(app_settings.menu_status_manager if app_settings else None, 'Status Manager', 'status_manager') }}</a>
+        <a href="{{ url_for('super_admin_payment_methods') }}">{{ label_or_t(app_settings.menu_payment_methods if app_settings else None, 'Payment Methods', 'payment_methods') }}</a>
+        <a href="{{ url_for('super_admin_master_settings') }}">{{ label_or_t(app_settings.menu_master_settings if app_settings else None, 'Master Settings', 'master_settings') }}</a>
+        <a href="{{ url_for('audit_log_page') }}">{{ label_or_t(app_settings.menu_audit_log if app_settings else None, 'Audit Log', 'audit_log') }}</a>
+        <a href="{{ url_for('profile') }}">{{ label_or_t(app_settings.menu_profile if app_settings else None, 'Profile', 'profile') }}</a>
+        {% if is_impersonating %}<form method="post" action="{{ url_for('stop_impersonation') }}" class="inline-form"><button type="submit" class="small secondary">Return to Super Admin</button></form>{% endif %}
+      {% else %}
+        <a href="{{ url_for('dashboard') }}">{{ label_or_t(app_settings.menu_dashboard if app_settings else None, 'Dashboard', 'dashboard') }}</a>
+        <a href="{{ url_for('customers') }}">{{ label_or_t(app_settings.menu_customers if app_settings else None, 'Customers', 'customers') }}</a>
+        <a href="{{ url_for('parts') }}">{{ label_or_t(app_settings.menu_parts if app_settings else None, 'Parts', 'parts') }}</a>
+        <a href="{{ url_for('repairs') }}">{{ label_or_t(app_settings.menu_repairs if app_settings else None, 'Repairs', 'repairs') }}</a>
+        <a href="{{ url_for('buying') }}">{{ label_or_t(app_settings.menu_buying if app_settings else None, 'GSM', 'buying') }}</a>
+        <a href="{{ url_for('reports') }}">{{ label_or_t(app_settings.menu_reports if app_settings else None, 'Reports', 'reports') }}</a>
+        <a href="{{ url_for('audit_log_page') }}">{{ label_or_t(app_settings.menu_audit_log if app_settings else None, 'Audit Log', 'audit_log') }}</a>
+        {% if current_user.role == 'Company Admin' %}
+          <a href="{{ url_for('users') }}">{{ label_or_t(app_settings.menu_users if app_settings else None, 'Users', 'users') }}</a>
+          <a href="{{ url_for('company_settings') }}">{{ label_or_t(app_settings.menu_settings if app_settings else None, 'Settings', 'settings') }}</a>
+          <a href="{{ url_for('data_manager') }}">{{ label_or_t(app_settings.menu_data_manager if app_settings else None, 'Data Manager', 'data_manager') }}</a>
+        {% endif %}
+        <a href="{{ url_for('profile') }}">{{ label_or_t(app_settings.menu_profile if app_settings else None, 'Profile', 'profile') }}</a>
+      {% endif %}
+      <a href="{{ url_for('logout') }}">{{ label_or_t(app_settings.menu_logout if app_settings else None, 'Logout', 'logout') }}</a>
+    </nav>
+    {% endif %}
+  </header>
+
+  <main class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+
+  {% if app_settings and app_settings.support_enabled and app_settings.support_whatsapp %}
+    <a class="support-float" target="_blank" href="https://wa.me/{{ app_settings.support_whatsapp|replace('+','') }}?text={{ (app_settings.support_message or 'Hello')|urlencode }}">{{ t('support_chat') }}</a>
+  {% endif %}
+  {% if app_settings and app_settings.support_enabled and app_settings.support_embed_code %}
+    {{ app_settings.support_embed_code|safe }}
+  {% endif %}
+</body>
+</html>

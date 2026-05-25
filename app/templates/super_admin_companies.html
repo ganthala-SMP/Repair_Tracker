@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Companies</h1>
+<div class="grid two">
+  <div class="card">
+    <h2>Create company</h2>
+    <form method="post" class="grid one">
+      <label>Company name<input name="name" required></label>
+      <label>Phone
+        <div class="phone-row">
+          <select name="phone_code">
+            <option value="+32" selected>+32 Belgium</option>
+            <option value="+33">+33 France</option>
+            <option value="+31">+31 Netherlands</option>
+            <option value="other">Other</option>
+          </select>
+          <input name="phone">
+        </div>
+      </label>
+      <label>Email<input name="email" type="email"></label>
+      <label>Address<textarea name="address"></textarea></label>
+      <label>Plan type
+        <select name="plan_type">
+          <option value="trial">Trial</option>
+          <option value="monthly">Monthly</option>
+          <option value="lifetime">Lifetime</option>
+        </select>
+      </label>
+      <label><input type="checkbox" name="unlimited_access" checked> Unlimited access</label>
+      <label>Active until<input name="active_until" type="date"></label>
+      <h3>First company admin</h3>
+      <label>Admin name<input name="admin_name" required></label>
+      <label>Admin email<input name="admin_email" type="email" required></label>
+      <label>Admin password<input name="admin_password" type="password" required></label>
+      <button type="submit">Create company</button>
+    </form>
+  </div>
+  <div class="card">
+    <div class="actions-inline" style="justify-content:space-between;align-items:center;">
+      <h2>Company list</h2>
+      <form method="get" class="searchrow" style="max-width:260px;">
+        <input name="q" value="{{ q }}" placeholder="Search company">
+        <button type="submit">Search</button>
+      </form>
+    </div>
+    <table>
+      <tr><th>Company</th><th>Plan</th><th>Access</th><th>Users</th><th>Repairs</th><th>Action</th></tr>
+      {% for company in companies %}
+      <tr>
+        <td><strong>{{ company.name }}</strong><br><span class="subtext">{{ company.email or '' }}</span></td>
+        <td>{{ company.plan_type|title }}</td>
+        <td>
+          <form method="post" action="{{ url_for('super_admin_company_access', company_id=company.id) }}" class="mini-form">
+            <select name="plan_type">
+              {% for p in ['trial','monthly','lifetime'] %}<option value="{{ p }}" {% if company.plan_type==p %}selected{% endif %}>{{ p.title() }}</option>{% endfor %}
+            </select>
+            <label class="checkline"><input type="checkbox" name="unlimited_access" {% if company.unlimited_access %}checked{% endif %}> Unlimited</label>
+            <input type="date" name="active_until" value="{{ company.active_until.strftime('%Y-%m-%d') if company.active_until else '' }}">
+            <button type="submit" class="small">Save</button>
+          </form>
+          <span class="subtext">{{ 'Active' if company.is_active else 'Disabled' }}</span>
+        </td>
+        <td>{{ company_stats[company.id].users }}</td>
+        <td>{{ company_stats[company.id].repairs }}</td>
+        <td class="actions-inline">
+          <a class="button small" href="{{ url_for('super_admin_company_settings', company_id=company.id) }}">Details</a>
+          <a class="button small secondary" href="{{ url_for('super_admin_company_users', company_id=company.id) }}">Users</a>
+          <form method="post" action="{{ url_for('toggle_company', company_id=company.id) }}"><button type="submit" class="small {{ 'danger' if company.is_active else '' }}">{{ 'Disable' if company.is_active else 'Enable' }}</button></form>
+          <form method="post" action="{{ url_for('super_admin_impersonate', company_id=company.id) }}"><button type="submit" class="small secondary">Impersonate</button></form>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}

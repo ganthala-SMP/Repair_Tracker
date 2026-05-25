@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ app_settings.menu_buying if app_settings and app_settings.menu_buying else 'GSM' }}</h1>
+<div class="grid two">
+  <div class="card">
+    <h2>Create Ticket</h2>
+    <form method="post" class="grid one" autocomplete="off">
+      <div class="grid two">
+        <label>{{ t('customer_name') }}<input name="customer_name" required placeholder="{{ t('customer_name') }}"></label>
+        <label>{{ t('customer_phone') }}
+          <div class="phone-row">
+            <select name="customer_phone_code">
+              <option value="+32" selected>+32 Belgium</option>
+              <option value="+33">+33 France</option>
+              <option value="+31">+31 Netherlands</option>
+              <option value="other">Other</option>
+            </select>
+            <input name="customer_phone" placeholder="" autocomplete="off" value="">
+          </div>
+        </label>
+        <label>{{ t('customer_email') }}<input name="customer_email" type="email"></label>
+        <label>Date<input name="due_date" type="date"></label>
+        <label>Status
+          <select name="status">{% for status in statuses %}<option value="{{ status }}">{{ status }}</option>{% endfor %}</select>
+        </label>
+        <label class="full">Note<textarea name="issue_description"></textarea></label>
+      </div>
+      <div id="gsm-items">
+        {% set gsm_items = items if items is defined else [{'brand':'','model':'','gb':'','imei':'','battery':'','serial':'','qty':1,'amount':0}] %}
+        {% for item in gsm_items %}
+        <div class="gsm-item-row">
+          <label>Brand<input name="item_brand[]" value="{{ item.brand if item.brand is defined else item['brand'] }}"></label>
+          <label>Model<input name="item_model[]" value="{{ item.model if item.model is defined else item['model'] }}"></label>
+          <label>GB
+            {% set current_gb = item.gb if item.gb is defined else item['gb'] %}
+            <select name="item_gb[]">
+              <option value="">Select GB</option>
+              {% for gb in ['64 GB','128 GB','256 GB','512 GB','1 TB'] %}
+              <option value="{{ gb }}" {% if current_gb == gb %}selected{% endif %}>{{ gb }}</option>
+              {% endfor %}
+            </select>
+          </label>
+          <label>IMEI<input name="item_imei[]" value="{{ item.imei if item.imei is defined else item['imei'] }}"></label>
+          <label>Battery %<input name="item_battery[]" type="number" min="0" max="100" step="1" value="{{ item.battery if item.battery is defined else item['battery'] }}"></label>
+          <label>{{ t('serial_number') }}<input name="item_serial[]" value="{{ item.serial if item.serial is defined else item['serial'] }}"></label>
+          <label>Qty<input name="item_qty[]" type="number" min="1" step="1" value="{{ item.qty if item.qty is defined else item['qty'] or 1 }}" class="line-qty"></label>
+          <label>Amount<input name="item_amount[]" type="number" min="0" step="0.01" value="{{ item.amount if item.amount is defined else item['amount'] or 0 }}" class="line-amount"></label>
+          <div class="line-total-wrap"><strong>Line Total</strong><div class="line-total">€ 0.00</div></div>
+          <button type="button" class="button danger small remove-item">Remove</button>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="stack-actions">
+        <button type="button" id="add-gsm-item" class="button secondary">+ Add Item</button>
+      </div>
+      <div class="card total-card"><strong>Total</strong><div id="gsm-grand-total">€ 0.00</div></div>
+      <button type="submit">Create Ticket</button>
+    </form>
+  </div>
+  <div class="card">
+    <h2>{{ app_settings.menu_buying if app_settings and app_settings.menu_buying else 'GSM' }}</h2>
+    <div class="table-scroll tall">
+      <table>
+        <tr><th>Ticket</th><th>{{ t('customer') }}</th><th>{{ t('device') }}</th><th>{{ t('status') }}</th><th>{{ t('action') }}</th></tr>
+        {% for ticket in tickets %}
+        <tr>
+          <td><strong>{{ ticket.ticket_code }}</strong><br><span class="subtext">{{ ticket.invoice_number }}</span></td>
+          <td>{{ ticket.customer.name }}<br><span class="subtext">{{ ticket.customer.phone }}</span></td>
+          <td>{% set first = ticket_items(ticket)[0] %}{{ format_gsm_description(first) }}</td>
+          <td>{{ ticket.status }}</td>
+          <td class="stack-actions">
+            <a class="button small" href="{{ url_for('buying_detail', ticket_id=ticket.id) }}">Open</a>
+            <a class="button secondary small" href="{{ url_for('print_buying_invoice', ticket_id=ticket.id, size='80mm') }}" target="_blank">Print</a>
+            <a class="button secondary small" href="{{ url_for('edit_buying', ticket_id=ticket.id) }}">Edit</a>
+            <form method="post" action="{{ url_for('delete_buying', ticket_id=ticket.id) }}"><button type="submit" class="button danger small">Delete</button></form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5">No tickets yet.</td></tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+</div>
+<template id="gsm-item-template">
+  <div class="gsm-item-row">
+    <label>Brand<input name="item_brand[]"></label>
+    <label>Model<input name="item_model[]"></label>
+    <label>GB
+      <select name="item_gb[]">
+        <option value="">Select GB</option>
+        <option>64 GB</option><option>128 GB</option><option>256 GB</option><option>512 GB</option><option>1 TB</option>
+      </select>
+    </label>
+    <label>IMEI<input name="item_imei[]"></label>
+    <label>Battery %<input name="item_battery[]" type="number" min="0" max="100" step="1"></label>
+    <label>{{ t('serial_number') }}<input name="item_serial[]"></label>
+    <label>Qty<input name="item_qty[]" type="number" min="1" step="1" value="1" class="line-qty"></label>
+    <label>Amount<input name="item_amount[]" type="number" min="0" step="0.01" value="0" class="line-amount"></label>
+    <div class="line-total-wrap"><strong>Line Total</strong><div class="line-total">€ 0.00</div></div>
+    <button type="button" class="button danger small remove-item">Remove</button>
+  </div>
+</template>
+<script>
+function recalcGsmTotals(){
+  let grand = 0;
+  document.querySelectorAll('.gsm-item-row').forEach(row=>{
+    const qty = parseFloat(row.querySelector('.line-qty')?.value || '1') || 1;
+    const amount = parseFloat(row.querySelector('.line-amount')?.value || '0') || 0;
+    const total = qty * amount;
+    const totalEl = row.querySelector('.line-total');
+    if(totalEl) totalEl.textContent = '€ ' + total.toFixed(2);
+    grand += total;
+  });
+  const grandEl = document.getElementById('gsm-grand-total');
+  if(grandEl) grandEl.textContent = '€ ' + grand.toFixed(2);
+}
+document.addEventListener('input', function(e){
+  if(e.target.matches('.line-qty, .line-amount')) recalcGsmTotals();
+});
+document.addEventListener('click', function(e){
+  if(e.target.id === 'add-gsm-item'){
+    const tpl = document.getElementById('gsm-item-template');
+    document.getElementById('gsm-items').appendChild(tpl.content.cloneNode(true));
+    recalcGsmTotals();
+  }
+  if(e.target.matches('.remove-item')){
+    const rows = document.querySelectorAll('.gsm-item-row');
+    if(rows.length > 1){
+      e.target.closest('.gsm-item-row').remove();
+      recalcGsmTotals();
+    }
+  }
+});
+recalcGsmTotals();
+</script>
+{% endblock %}

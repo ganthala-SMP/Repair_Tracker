@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ t('payment_methods') }}</h1>
+<div class="grid two">
+  <div class="card">
+    <h2>{{ t('create_payment_method') }}</h2>
+    <form method="post" class="grid one">
+      <label>{{ t('name') }}<input name="name" required></label>
+      <button type="submit">{{ t('save_changes') }}</button>
+    </form>
+  </div>
+  <div class="card">
+    <h2>{{ t('existing_payment_methods') }}</h2>
+    <table>
+      <tr><th>{{ t('name') }}</th><th>{{ t('status') }}</th><th>{{ t('action') }}</th></tr>
+      {% for method in methods %}
+      <tr>
+        <td>{{ method.name }}</td>
+        <td>{{ t('active') if method.is_active else t('disabled') }}</td>
+        <td>
+          <form method="post" action="{{ url_for('toggle_payment_method', method_id=method.id) }}">
+            <button class="button small secondary" type="submit">{{ t('disable') if method.is_active else t('enable') }}</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}

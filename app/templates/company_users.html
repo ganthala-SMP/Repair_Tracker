@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ company.name }} {{ t('users') }}</h1>
+<div class="grid two">
+  <div class="card">
+    <h2>{{ t('create_user') }}</h2>
+    <form method="post" class="grid one">
+      <label>{{ t('name') }}<input name="name" required></label>
+      <label>{{ t('email') }}<input name="email" type="email" required></label>
+      <label>{{ t('password') }}<input name="password" type="password" required></label>
+      <label>{{ t('role') }}
+        <select name="role">
+          {% for role in company_role_labels %}
+          <option value="{{ role }}">{{ role }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      {% if super_admin_mode %}
+      <label><input type="checkbox" name="unlimited_access" checked> {{ t('unlimited_access') }}</label>
+      <label>{{ t('active_until') }}<input name="active_until" type="date" min="{{ today_iso }}"></label>
+      {% endif %}
+      <button type="submit">{{ t('create_user') }}</button>
+    </form>
+  </div>
+  <div class="card">
+    <h2>{{ t('users') }}</h2>
+    <table>
+      <tr><th>{{ t('name') }}</th><th>{{ t('email') }}</th><th>{{ t('role') }}</th><th>{{ t('status') }}</th><th>{{ t('access') }}</th><th>{{ t('action') }}</th></tr>
+      {% for user in users %}
+      <tr>
+        <td>{{ user.name }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.role }}</td>
+        <td>{{ t('active') if user.is_active else t('disabled') }}</td>
+        <td>{{ t('unlimited_access') if user.unlimited_access else user.active_until.strftime('%Y-%m-%d') if user.active_until else '-' }}</td>
+        <td>
+          {% if super_admin_mode %}
+          <form method="post" action="{{ url_for('super_admin_toggle_user', user_id=user.id) }}">
+            <button type="submit" class="small {{ 'danger' if user.is_active else '' }}">{{ t('disable') if user.is_active else t('enable') }}</button>
+          </form>
+          {% else %}
+          <form method="post" action="{{ url_for('toggle_user', user_id=user.id) }}">
+            <button type="submit" class="small {{ 'danger' if user.is_active else '' }}">{{ t('disable') if user.is_active else t('enable') }}</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}

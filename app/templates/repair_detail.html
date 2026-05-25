@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="repair-id-display">{{ repair.repair_code }}</h1>
+<div class="grid two">
+  <div class="card">
+    <h2>{{ t('repair_info') }}</h2>
+    <div class="info-list">
+      <p><strong>{{ t('invoice_number') }}:</strong> {{ repair.invoice_number }}</p>
+      <p><strong>{{ t('customer') }}:</strong> {{ repair.customer.name }} / {{ repair.customer.phone }}</p>
+      <p><strong>{{ t('device') }}:</strong> {{ repair.device_brand }} {{ repair.device_model }}</p>
+      <p><strong>IMEI:</strong> {{ repair.imei or '-' }}</p>
+      <p><strong>{{ t('serial_number') }}:</strong> {{ repair.serial_number or '-' }}</p>
+      <p><strong>{{ t('status') }}:</strong> {{ status_label(repair.status) }}</p>
+      <p><strong>{{ t('issue') }}:</strong> {{ repair.issue_description }}</p>
+      <p><strong>{{ t('estimated') }}:</strong> € {{ '%.2f'|format(repair.estimated_cost or 0) }}</p>
+      <p><strong>{{ t('deposit') }}:</strong> € {{ '%.2f'|format(repair.deposit_amount or 0) }}</p>
+      <p><strong>{{ t('due_date') }}:</strong> {{ repair.due_date or '-' }}</p>
+    </div>
+    <div class="stack-actions">
+      <a class="button" href="{{ url_for('print_invoice', repair_id=repair.id, size='80mm') }}" target="_blank">{{ t('print_invoice') }}</a>
+      {% if repair.customer and repair.customer.phone and repair.status in ['Ready', 'Delivered'] %}
+      <a class="button" href="{{ url_for('notify_customer', repair_id=repair.id) }}" target="_blank">Notify Customer</a>
+      {% endif %}
+      <a class="button secondary" href="{{ url_for('edit_repair', repair_id=repair.id) }}">Edit Repair</a>
+      <form method="post" action="{{ url_for('delete_repair', repair_id=repair.id) }}" style="display:inline;">
+        <button type="submit" class="button danger">Delete Repair</button>
+      </form>
+      <a class="button secondary" href="{{ url_for('public_status_portal', repair=repair.repair_code) }}" target="_blank">Public status page</a>
+    </div>
+  </div>
+  <div class="card">
+    <h2>{{ t('financial_summary') }}</h2>
+    <p><strong>{{ t('subtotal') }}:</strong> € {{ '%.2f'|format(subtotal) }}</p>
+    <p><strong>{{ t('total_paid') }}:</strong> € {{ '%.2f'|format(total_paid) }}</p>
+    <p><strong>{{ t('balance_due') }}:</strong> € {{ '%.2f'|format(balance) }}</p>
+  </div>
+</div>
+<div class="grid two">
+  <div class="card">
+    <h2>{{ t('update_status') }}</h2>
+    <form method="post" class="grid one">
+      <input type="hidden" name="action" value="update_status">
+      <label>{{ t('status') }}
+        <select name="status">{% for status in statuses %}<option value="{{ status }}" {% if status == repair.status %}selected{% endif %}>{{ status_label(status) }}</option>{% endfor %}</select>
+      </label>
+      <label>{{ t('note') }}<textarea name="note"></textarea></label>
+      <button type="submit">{{ t('save_update') }}</button>
+    </form>
+  </div>
+  <div class="card">
+    <h2>{{ t('add_payment') }}</h2>
+    <form method="post" class="grid one">
+      <input type="hidden" name="action" value="add_payment">
+      <label>{{ t('amount') }}<input type="number" step="0.01" min="0" name="amount" required></label>
+      <label>{{ t('method') }}
+        <select name="method" required>
+          <option value="" disabled selected>{{ t('select_payment_method') }}</option>
+          {% for method in payment_methods %}<option value="{{ method }}">{{ method }}</option>{% endfor %}
+        </select>
+      </label>
+      <button type="submit">{{ t('record_payment') }}</button>
+    </form>
+    <hr>
+    <h3>Recorded Payments</h3>
+    {% for payment in repair.payments %}
+      <form method="post" action="{{ url_for('edit_payment', payment_id=payment.id) }}" class="payment-edit-row">
+        <input type="number" step="0.01" min="0" name="amount" value="{{ '%.2f'|format(payment.amount) }}" required>
+        <select name="method">{% for method in payment_methods %}<option value="{{ method }}" {% if payment.method == method %}selected{% endif %}>{{ method }}</option>{% endfor %}</select>
+        <button type="submit" class="small secondary">Edit</button>
+      </form>
+      <form method="post" action="{{ url_for('delete_payment', payment_id=payment.id) }}" style="margin-top:4px; margin-bottom:10px;">
+        <button type="submit" class="small danger">Delete</button>
+      </form>
+    {% else %}
+      <p class="subtext">No payments recorded yet.</p>
+    {% endfor %}
+  </div>
+</div>
+<div class="grid two">
+  <div class="card">
+    <h2>{{ t('use_part') }}</h2>
+    <form method="post" class="grid one">
+      <input type="hidden" name="action" value="use_part">
+      <label>{{ t('part') }}
+        <select name="part_id" {% if not parts %}disabled{% endif %}>
+          {% if parts %}
+            {% for part in parts %}
+            <option value="{{ part.id }}">{{ part.name }}{% if part.compatible_model %} - {{ part.compatible_model }}{% endif %} ({{ t('qty') }}: {{ part.quantity }})</option>
+            {% endfor %}
+          {% else %}
+            <option value="">{{ t('no_parts_available') }}</option>
+          {% endif %}
+        </select>
+      </label>
+      <label>{{ t('quantity') }}<input type="number" min="1" value="1" name="quantity"></label>
+      <button type="submit" {% if not parts %}disabled{% endif %}>{{ t('use_part') }}</button>
+    </form>
+  </div>
+  <div class="card">
+    <h2>{{ t('internal_notes') }}</h2>
+    <form method="post" class="grid one">
+      <input type="hidden" name="action" value="add_internal_note">
+      <textarea name="internal_note" placeholder="{{ t('internal_note_help') }}"></textarea>
+      <button type="submit">{{ t('add_note') }}</button>
+    </form>
+  </div>
+</div>
+<div class="card">
+  <h2>Customer Note</h2>
+  <form method="post" class="grid one">
+    <input type="hidden" name="action" value="update_customer_note">
+    <textarea name="customer_note" placeholder="Printed on invoice for the customer">{{ repair.customer_note or '' }}</textarea>
+    <button type="submit">Save Customer Note</button>
+  </form>
+</div>
+<div class="card">
+  <h2>{{ t('repair_history_timeline') }}</h2>
+  <table>
+    <tr><th>{{ t('when') }}</th><th>{{ t('type') }}</th><th>{{ t('description') }}</th><th>{{ t('by') }}</th></tr>
+    {% for item in timeline %}
+      <tr>
+        <td>{{ item.when.strftime('%Y-%m-%d %H:%M') }}</td>
+        <td>{{ item.kind }}</td>
+        <td>{{ item.label }}{% if item.note %}<br><span class="subtext">{{ item.note }}</span>{% endif %}</td>
+        <td>{{ item.by }}</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="4">{{ t('no_updates_yet') }}</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

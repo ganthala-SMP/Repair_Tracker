@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ t('repairs') }}</h1>
+<div class="grid two">
+  <div class="card">
+    <h2>{{ t('create_repair') }}</h2>
+    <form method="post" autocomplete="off">
+      <div class="grid two">
+        <label>{{ t('customer_name') }}<input name="customer_name" required placeholder="{{ t('customer_name') }}"></label>
+        <label>{{ t('customer_phone') }}
+          <div class="phone-row">
+            <select name="customer_phone_code">
+              <option value="+32" selected>+32 Belgium</option>
+              <option value="+33">+33 France</option>
+              <option value="+31">+31 Netherlands</option>
+              <option value="other">Other</option>
+            </select>
+            <input name="customer_phone" placeholder="" autocomplete="off" value="">
+          </div>
+        </label>
+        <label>{{ t('customer_email') }}<input name="customer_email" type="email"></label>
+        <label>Date<input name="due_date" type="date"></label>
+        <label>{{ t('status') }}
+          <select name="status">{% for status in statuses %}<option value="{{ status }}">{{ status_label(status) }}</option>{% endfor %}</select>
+        </label>
+        <label>{{ t('deposit') }}<input name="deposit_amount" type="number" step="0.01" value=""></label>
+        <label class="full">Customer Note<textarea name="customer_note"></textarea></label>
+      </div>
+
+      <h3>Devices</h3>
+      <div id="repair-items" class="dynamic-items">
+        <div class="repair-item-row">
+          <label>Brand<input name="repair_item_brand[]" required></label>
+          <label>Model<input name="repair_item_model[]" required></label>
+          <label>IMEI<input name="repair_item_imei[]"></label>
+          <label>Serial<input name="repair_item_serial[]"></label>
+          <label class="wide">Issue Description<textarea name="repair_item_issue[]" required></textarea></label>
+          <label>Price<input name="repair_item_amount[]" type="number" step="0.01" value=""></label>
+          <button type="button" class="small danger remove-repair-item">Remove</button>
+        </div>
+      </div>
+      <div class="actions-inline">
+        <button type="button" class="secondary" id="add-repair-item">+ Add Device</button>
+        <button type="submit">{{ t('create_repair') }}</button>
+      </div>
+    </form>
+  </div>
+  <div class="card">
+    <div class="actions-inline" style="justify-content:space-between;">
+      <h2>{{ t('repairs') }}</h2>
+      <form method="post" action="{{ url_for('finish_all_repairs') }}" onsubmit="return confirm('Mark all repairs as Delivered?');">
+        <button type="submit" class="secondary">Finish All</button>
+      </form>
+    </div>
+    <div class="table-scroll tall">
+    <table>
+      <tr><th>{{ t('repair_code') }}</th><th>{{ t('customer') }}</th><th>{{ t('device') }}</th><th>{{ t('status') }}</th><th>{{ t('action') }}</th></tr>
+      {% for repair in repairs %}
+      <tr>
+        <td><strong>{{ repair.repair_code }}</strong><br><span class="subtext">{{ repair.invoice_number }}</span></td>
+        <td>{{ repair.customer.name }}<br><span class="subtext">{{ repair.customer.phone }}</span></td>
+        <td>{% set first = repair_items(repair)[0] if repair_items(repair) else None %}{% if first %}{{ first.brand }} {{ first.model }}{% else %}{{ repair.device_brand }} {{ repair.device_model }}{% endif %}{% if repair.imei %}<br><span class="subtext">IMEI: {{ repair.imei }}</span>{% endif %}</td>
+        <td>{{ status_label(repair.status) }}</td>
+        <td class="actions-inline">
+          <a class="button small" href="{{ url_for('repair_detail', repair_id=repair.id) }}">{{ t('open') }}</a>
+          <a class="button small secondary" href="{{ url_for('print_invoice', repair_id=repair.id, size='80mm') }}">Print</a>
+          <a class="button small secondary" href="{{ url_for('edit_repair', repair_id=repair.id) }}">Edit</a>
+          <form method="post" action="{{ url_for('delete_repair', repair_id=repair.id) }}" style="display:inline;">
+            <button type="submit" class="small danger">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5">{{ t('no_repairs_yet') }}</td></tr>
+      {% endfor %}
+    </table>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  const container = document.getElementById('repair-items');
+  const addBtn = document.getElementById('add-repair-item');
+  function bindRemove(btn){ btn.addEventListener('click', function(){ if(container.children.length > 1){ btn.closest('.repair-item-row').remove(); } }); }
+  container.querySelectorAll('.remove-repair-item').forEach(bindRemove);
+  addBtn.addEventListener('click', function(){
+    const row = container.children[0].cloneNode(true);
+    row.querySelectorAll('input, textarea').forEach(el => { el.value = ''; });
+    bindRemove(row.querySelector('.remove-repair-item'));
+    container.appendChild(row);
+  });
+})();
+</script>
+{% endblock %}

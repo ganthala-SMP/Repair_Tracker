@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Super Admin Dashboard</h1>
+<div class="stats">
+  <div class="stat"><strong>{{ companies_count }}</strong><span>Total companies</span></div>
+  <div class="stat"><strong>{{ active_companies }}</strong><span>Active companies</span></div>
+  <div class="stat"><strong>{{ expired_companies }}</strong><span>Expired companies</span></div>
+  <div class="stat"><strong>{{ attention_companies }}</strong><span>Need attention</span></div>
+  <div class="stat"><strong>{{ users_count }}</strong><span>Total users</span></div>
+  <div class="stat"><strong>{{ repairs_count }}</strong><span>Total repairs</span></div>
+</div>
+<div class="grid two">
+  <div class="card">
+    <h2>Recent companies</h2>
+    <table>
+      <tr><th>Company</th><th>Plan</th><th>Access</th><th>Users</th><th>Repairs</th><th>Action</th></tr>
+      {% for company in companies %}
+      <tr>
+        <td><strong>{{ company.name }}</strong><br><span class="subtext">{{ company.email or '' }}</span></td>
+        <td>{{ company.plan_type|title }}</td>
+        <td>{% if company.is_active %}{% if company.unlimited_access %}Unlimited{% else %}Until {{ company.active_until or '-' }}{% endif %}{% else %}Disabled{% endif %}</td>
+        <td>{{ company_stats[company.id].users }}</td>
+        <td>{{ company_stats[company.id].repairs }}</td>
+        <td class="actions-inline">
+          <a class="button small" href="{{ url_for('super_admin_company_settings', company_id=company.id) }}">Details</a>
+          <form method="post" action="{{ url_for('super_admin_impersonate', company_id=company.id) }}">
+            <button type="submit" class="small secondary">Impersonate</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+  <div class="card subtle">
+    <h2>Global controls</h2>
+    <div class="stack-actions">
+      <a class="button" href="{{ url_for('super_admin_companies') }}">Companies</a>
+      <a class="button secondary" href="{{ url_for('super_admin_payment_methods') }}">Payment methods</a>
+      <a class="button secondary" href="{{ url_for('super_admin_statuses') }}">Status manager</a>
+      <a class="button secondary" href="{{ url_for('super_admin_master_settings') }}">Theme / Support</a>
+      <a class="button secondary" href="{{ url_for('audit_log_page') }}">Audit Log</a>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <h2>Recent audit activity</h2>
+  <table>
+    <tr><th>When</th><th>User</th><th>Action</th><th>Detail</th></tr>
+    {% for log in recent_audit %}
+    <tr>
+      <td>{{ log.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+      <td>{{ log.user.name if log.user else '-' }}</td>
+      <td>{{ log.action }}</td>
+      <td>{{ log.detail or '-' }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="4">No audit activity yet.</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

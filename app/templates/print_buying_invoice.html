@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="{{ invoice_lang }}">
+<head>
+  <meta charset="utf-8">
+  <title>{{ invoice_title or 'Ticket' }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+  <style>
+    @page { {% if size == '4x6' %}size: 4in 6in;{% elif size == '80mm' %}size: 80mm auto;{% else %}size: A4;{% endif %} margin: 0; }
+  </style>
+</head>
+<body class="print-body print-size-{{ size }}">
+<div class="invoice-toolbar no-print">
+  <a class="button" href="{{ url_for('buying_detail', ticket_id=ticket.id) }}">{{ t('back') }}</a>
+  <a class="button secondary" href="{{ url_for('print_buying_invoice', ticket_id=ticket.id, size='80mm', lang=invoice_lang) }}">80mm</a>
+  <a class="button secondary" href="{{ url_for('print_buying_invoice', ticket_id=ticket.id, size='4x6', lang=invoice_lang) }}">4x6</a>
+  <a class="button secondary" href="{{ url_for('print_buying_invoice', ticket_id=ticket.id, size='a4', lang=invoice_lang) }}">A4</a>
+  <a class="button secondary" href="{{ url_for('print_buying_invoice', ticket_id=ticket.id, size=size, lang='en') }}">EN</a>
+  <a class="button secondary" href="{{ url_for('print_buying_invoice', ticket_id=ticket.id, size=size, lang='fr') }}">FR</a>
+  <a class="button secondary" href="{{ url_for('print_buying_invoice', ticket_id=ticket.id, size=size, lang='nl') }}">NL</a>
+  <button class="button" onclick="window.print()">Print Ticket</button>
+</div>
+<div class="invoice-page {{ size_class }}" style="--company-print-width: {{ company.print_width_in or 3.82 }}in; --company-print-height: {{ company.print_height_in or 5.80 }}in; --company-pad-x: {{ company.print_padding_x_in or 0.12 }}in; --company-pad-y: {{ company.print_padding_y_in or 0.12 }}in; --company-header-font: {{ company.print_header_font_px or 10 }}px; --company-body-font: {{ company.print_body_font_px or 11 }}px; --company-notice-font: {{ company.print_notice_font_px or 9 }}px; --company-content-shift: {{ company.print_content_shift_in or 0.18 }}in; --company-80mm-width: {{ company.print_80mm_width_mm or 80 }}mm; --company-80mm-padding: {{ company.print_80mm_padding_mm or 4 }}mm; --company-80mm-header-font: {{ company.print_80mm_header_font_px or 9 }}px; --company-80mm-body-font: {{ company.print_80mm_body_font_px or 9 }}px; --company-80mm-notice-font: {{ company.print_80mm_notice_font_px or 8 }}px; --company-80mm-shift: {{ company.print_80mm_content_shift_mm or 0 }}mm;">
+  <div class="invoice-header">
+    <div class="brandline">
+      <img src="{{ url_for('static', filename=company.logo_path) if company.logo_path else url_for('static', filename='img/logo.png') }}" alt="logo">
+      <div>
+        <h1>{{ company.name }}</h1>
+        <div>{{ company.address or '' }}</div>
+        <div>{{ company.phone or '' }} {% if company.email %}| {{ company.email }}{% endif %}</div>
+      </div>
+    </div>
+    <div class="invoice-title nowrap">{{ (invoice_title or 'Ticket').replace('Invoice','Ticket') }}</div>
+  </div>
+  <div class="invoice-grid">
+    <div class="repair-id-row"><strong>Ticket ID:</strong> <span class="repair-id-large nowrap">{{ ticket.invoice_number }}</span></div>
+    <div><strong>Ticket Code:</strong> <span class="repair-code-value nowrap">{{ ticket.ticket_code }}</span></div>
+    <div><strong>Date:</strong> {{ ticket.created_at.strftime('%Y-%m-%d') }}</div>
+    <div><strong>{{ customer_label or t('customer') }}:</strong> <span class="field-value">{{ ticket.customer.name }}</span></div>
+    <div><strong>{{ phone_label or t('phone') }}:</strong> <span class="field-value nowrap">{{ ticket.customer.phone }}</span></div>
+    <div><strong>{{ status_label_text or t('status') }}:</strong> <span class="field-value">{{ ticket.status }}</span></div>
+  </div>
+  <div class="invoice-stretch">
+    <div>
+      <div class="lineitem-head"><span>Description</span><span>{{ qty_label or t('qty') }}</span><span>Price</span><span>{{ amount_label or t('amount') }}</span></div>
+      {% for item in items %}
+      <div class="lineitem">
+        <span>{{ format_gsm_description(item) }}{% if item.imei %} | IMEI: {{ item.imei }}{% endif %}{% if item.serial %} | {{ t('serial_number') }}: {{ item.serial }}{% endif %}{% if item.battery %} | Battery: {{ item.battery }}{% if '%' not in item.battery|string %}%{% endif %}{% endif %}</span>
+        <span>{{ item.qty }}</span>
+        <span>€ {{ '%.2f'|format(item.amount or 0) }}</span>
+        <span>€ {{ '%.2f'|format((item.amount or 0) * (item.qty or 1)) }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="invoice-bottom-block">
+      <div class="totals-row total"><span>Total</span><span>€ {{ '%.2f'|format(total) }}</span></div>
+      <div class="qr-wrap"><img src="{{ qr_image }}" alt="QR"><div><div class="subtext barcode-text">{{ ticket.ticket_code }}</div></div></div>
+      <div class="barcode-wrap"><img src="{{ barcode_image }}" alt="Barcode"></div>
+      {% if ticket.issue_description %}<div class="terms compact"><strong>Note</strong><div>{{ ticket.issue_description }}</div></div>{% endif %}
+      <div class="terms compact"><strong>{{ t('terms') }}</strong><div class="flow-text">{{ invoice_terms_text }}</div></div>
+      <div class="notice compact"><strong>{{ t('important_notice') }}</strong><div class="flow-text">{{ storage_notice_text }}</div></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

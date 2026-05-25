@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ t('data_manager') }}</h1>
+<div class="grid two">
+  <div class="card">
+    <h2>{{ t('export_data') }}</h2>
+    <div class="grid one">
+      <a class="button" href="{{ url_for('export_full_json') }}" target="_blank" rel="noopener">Full Backup (JSON)</a>
+      <a class="button" href="{{ url_for('export_full_xlsx') }}" target="_blank" rel="noopener">Full Backup (Excel)</a>
+      <a class="button secondary" href="{{ url_for('export_data', kind='customers') }}" target="_blank" rel="noopener">Export Customers (CSV)</a>
+      <a class="button secondary" href="{{ url_for('export_data', kind='customers', format='xlsx') }}" target="_blank" rel="noopener">Export Customers (Excel)</a>
+      <a class="button secondary" href="{{ url_for('export_data', kind='parts') }}" target="_blank" rel="noopener">Export Parts (CSV)</a>
+      <a class="button secondary" href="{{ url_for('export_data', kind='parts', format='xlsx') }}" target="_blank" rel="noopener">Export Parts (Excel)</a>
+      <a class="button secondary" href="{{ url_for('export_data', kind='repairs') }}" target="_blank" rel="noopener">Export Repairs (CSV)</a>
+      <a class="button secondary" href="{{ url_for('export_data', kind='repairs', format='xlsx') }}" target="_blank" rel="noopener">Export Repairs (Excel)</a>
+    </div>
+  </div>
+  <div class="card">
+    <h2>{{ t('import_data') }}</h2>
+    <div class="import-group">
+      <div class="toolbar-row"><a class="button secondary small" href="{{ url_for('import_template', kind='customers') }}">Download Customers Template</a></div>
+      <form method="post" action="{{ url_for('import_customers') }}" enctype="multipart/form-data" class="import-form">
+        <input type="file" name="file" accept=".csv,.xlsx" required>
+        <button type="submit" class="small">Import Customers</button>
+      </form>
+    </div>
+    <div class="import-group">
+      <div class="toolbar-row"><a class="button secondary small" href="{{ url_for('import_template', kind='parts') }}">Download Parts Template</a></div>
+      <form method="post" action="{{ url_for('import_parts') }}" enctype="multipart/form-data" class="import-form">
+        <input type="file" name="file" accept=".csv,.xlsx" required>
+        <button type="submit" class="small">Import Parts</button>
+      </form>
+    </div>
+    <div class="import-group">
+      <p class="subtext">Use JSON or Excel full backups to restore an entire company workspace.</p>
+      <form method="post" action="{{ url_for('import_full_json') }}" enctype="multipart/form-data" class="import-form">
+        <input type="file" name="file" accept=".json" required>
+        <button type="submit" class="small danger">Import Full Backup (JSON)</button>
+      </form>
+      <form method="post" action="{{ url_for('import_full_xlsx') }}" enctype="multipart/form-data" class="import-form" style="margin-top:10px;">
+        <input type="file" name="file" accept=".xlsx" required>
+        <button type="submit" class="small danger">Import Full Backup (Excel)</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

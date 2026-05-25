@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="{{ invoice_lang }}">
+<head>
+  <meta charset="utf-8">
+  <title>{{ t('invoice') }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+  <style>
+    @page {
+      {% if size == '4x6' %}size: 4in 6in;{% elif size == '80mm' %}size: 80mm auto;{% else %}size: A4;{% endif %}
+      margin: 0;
+    }
+  </style>
+</head>
+<body class="print-body print-size-{{ size }}">
+<div class="invoice-toolbar no-print">
+  <a class="button" href="{{ url_for('repair_detail', repair_id=repair.id) }}">{{ t('back') }}</a>
+  <a class="button secondary" href="{{ url_for('print_invoice', repair_id=repair.id, size='80mm', lang=invoice_lang) }}">80mm</a>
+  <a class="button secondary" href="{{ url_for('print_invoice', repair_id=repair.id, size='4x6', lang=invoice_lang) }}">4x6</a>
+  <a class="button secondary" href="{{ url_for('print_invoice', repair_id=repair.id, size='a4', lang=invoice_lang) }}">A4</a>
+  <a class="button secondary" href="{{ url_for('print_invoice', repair_id=repair.id, size=size, lang='en') }}">EN</a>
+  <a class="button secondary" href="{{ url_for('print_invoice', repair_id=repair.id, size=size, lang='fr') }}">FR</a>
+  <a class="button secondary" href="{{ url_for('print_invoice', repair_id=repair.id, size=size, lang='nl') }}">NL</a>
+  <button class="button" onclick="window.print()">{{ t('print_invoice') }}</button>
+</div>
+<div class="invoice-page repair-invoice {{ size_class }}" style="--company-print-width: {{ company.print_width_in or 3.82 }}in; --company-print-height: {{ company.print_height_in or 5.80 }}in; --company-pad-x: {{ company.print_padding_x_in or 0.12 }}in; --company-pad-y: {{ company.print_padding_y_in or 0.12 }}in; --company-header-font: {{ company.print_header_font_px or 10 }}px; --company-body-font: {{ company.print_body_font_px or 11 }}px; --company-notice-font: {{ company.print_notice_font_px or 9 }}px; --company-content-shift: {{ company.print_content_shift_in or 0.18 }}in; --company-80mm-width: {{ company.print_80mm_width_mm or 80 }}mm; --company-80mm-padding: {{ company.print_80mm_padding_mm or 4 }}mm; --company-80mm-header-font: {{ company.print_80mm_header_font_px or 9 }}px; --company-80mm-body-font: {{ company.print_80mm_body_font_px or 9 }}px; --company-80mm-notice-font: {{ company.print_80mm_notice_font_px or 8 }}px; --company-80mm-shift: {{ company.print_80mm_content_shift_mm or 0 }}mm;">
+  <div class="invoice-header">
+    <div class="brandline">
+      <img src="{{ url_for('static', filename=company.logo_path) if company.logo_path else url_for('static', filename='img/logo.png') }}" alt="logo">
+      <div>
+        <h1>{{ company.name }}</h1>
+        <div>{{ company.address or '' }}</div>
+        <div>{{ company.phone or '' }} {% if company.email %}| {{ company.email }}{% endif %}</div>
+      </div>
+    </div>
+    <div class="invoice-title nowrap">{{ invoice_title|upper }}</div>
+    <div class="repair-code-main nowrap">{{ repair.repair_code }}</div>
+  </div>
+  <div class="invoice-grid repair-print-summary">
+    <div><strong>{{ customer_label or t('customer') }}:</strong> <span class="field-value">{{ repair.customer.name }}</span></div>
+    {% if repair.customer.phone %}
+    <div><strong>{{ t('phone') }}:</strong> <span class="field-value nowrap">{{ repair.customer.phone }}</span></div>
+    {% endif %}
+    {% if repair.customer.email %}
+    <div><strong>{{ t('email') }}:</strong> <span class="field-value">{{ repair.customer.email }}</span></div>
+    {% endif %}
+    <div><strong>{{ t('date') }}:</strong> {{ repair.created_at.strftime('%Y-%m-%d') }}</div>
+    <div><strong>{{ status_label_text or t('status') }}:</strong> <span class="field-value">{{ status_label(repair.status) }}</span></div>
+  </div>
+
+  <div class="invoice-stretch">
+
+    <div>
+      <div class="lineitem-head"><span>{{ description_label or t('description') }}</span><span>{{ qty_label or t('qty') }}</span><span>{{ amount_label or t('amount') }}</span></div>
+      {% for item in items %}
+      <div class="lineitem">
+        <span>{{ format_repair_description(item) }}{% if item.imei %} | IMEI: {{ item.imei }}{% endif %}{% if item.serial %} | {{ serial_label or t('serial_number') }}: {{ item.serial }}{% endif %}</span>
+        <span>1</span>
+        <span>€ {{ '%.2f'|format(item.amount or 0) }}</span>
+      </div>
+      {% endfor %}
+      {% for used in repair.parts_used %}
+      <div class="lineitem"><span>{{ used.part.name }}</span><span>{{ used.quantity }}</span><span>€ {{ '%.2f'|format((used.price_used or 0) * used.quantity) }}</span></div>
+      {% endfor %}
+    </div>
+    <div class="invoice-bottom-block">
+      <div class="totals-row"><span>{{ subtotal_label or t('subtotal') }}</span><span>€ {{ '%.2f'|format(subtotal) }}</span></div>
+      <div class="totals-row"><span>{{ deposit_label or t('deposit') }}</span><span>€ {{ '%.2f'|format(repair.deposit_amount or 0) }}</span></div>
+      <div class="totals-row"><span>{{ total_paid_label or t('total_paid') }}</span><span>€ {{ '%.2f'|format(total_paid) }}</span></div>
+      <div class="totals-row total"><span>{{ balance_due_label or t('balance_due') }}</span><span>€ {{ '%.2f'|format(balance) }}</span></div>
+      <div class="qr-wrap"><img src="{{ qr_image }}" alt="QR"><div><div class="subtext barcode-text">{{ repair.repair_code }}</div><div class="subtext">{{ qr_caption }}</div></div></div>
+      <div class="barcode-wrap"><img src="{{ barcode_image }}" alt="Barcode"></div>
+{% if show_public_status_url %}<div class="subtext">{{ public_url }}</div>{% endif %}
+      {% if repair.customer_note %}<div class="terms compact"><strong>{{ t('customer_note') }}</strong><div>{{ repair.customer_note }}</div></div>{% endif %}
+      <div class="terms compact">
+        <strong>{{ t('terms') }}</strong>
+        <div class="flow-text">{{ invoice_terms_text }}</div>
+      </div>
+      <div class="notice compact">
+        <strong>{{ t('important_notice') }}</strong>
+        <div class="flow-text">{{ storage_notice_text }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

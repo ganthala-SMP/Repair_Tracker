@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Reports</h1>
+<div class="card">
+  <form method="get" class="grid three">
+    <label>Date from<input type="date" name="date_from" value="{{ date_from }}"></label>
+    <label>Date to<input type="date" name="date_to" value="{{ date_to }}"></label>
+    <div class="actions-inline report-actions"><button type="submit">Apply filters</button></div>
+  </form>
+</div>
+<div class="stats">
+  <div class="stat"><strong>{{ repairs|length }}</strong><span>Repairs in range</span></div>
+  <div class="stat"><strong>€ {{ '%.2f'|format(revenue) }}</strong><span>Payments received</span></div>
+  <div class="stat"><strong>€ {{ '%.2f'|format(deposit_total) }}</strong><span>Deposits</span></div>
+  <div class="stat"><strong>{{ top_parts|length }}</strong><span>Top used parts</span></div>
+</div>
+<div class="grid two">
+  <div class="card">
+    <h2>Repairs by status</h2>
+    <table>
+      <tr><th>Status</th><th>Count</th></tr>
+      {% for status, count in status_counts.items() %}
+      <tr><td>{{ status_label(status) }}</td><td>{{ count }}</td></tr>
+      {% else %}
+      <tr><td colspan="2">No repairs found.</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+  <div class="card">
+    <h2>Parts usage</h2>
+    <table>
+      <tr><th>Part</th><th>Qty used</th></tr>
+      {% for part, count in top_parts %}
+      <tr><td>{{ part }}</td><td>{{ count }}</td></tr>
+      {% else %}
+      <tr><td colspan="2">No parts usage found.</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+<div class="card">
+  <h2>Recent payments</h2>
+  <table>
+    <tr><th>Date</th><th>Repair</th><th>Method</th><th>Amount</th></tr>
+    {% for item in payments[:20] %}
+    <tr><td>{{ item.created_at.strftime('%Y-%m-%d %H:%M') }}</td><td>{{ item.repair_job.repair_code }}</td><td>{{ item.method }}</td><td>€ {{ '%.2f'|format(item.amount) }}</td></tr>
+    {% else %}
+    <tr><td colspan="4">No payments in this range.</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

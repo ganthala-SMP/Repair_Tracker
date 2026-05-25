@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Edit GSM {{ ticket.ticket_code }}</h1>
+<div class="card">
+  <form method="post" class="grid one" autocomplete="off">
+    <div class="grid two">
+      <label>{{ t('customer_name') }}<input name="customer_name" value="{{ ticket.customer.name }}" required></label>
+      {% set cp = ticket.customer.phone or '' %}
+      {% set selected_code = '+32' %}
+      {% set number_value = cp %}
+      {% if cp.startswith('+33') %}{% set selected_code = '+33' %}{% set number_value = cp[3:] %}{% elif cp.startswith('+31') %}{% set selected_code = '+31' %}{% set number_value = cp[3:] %}{% elif cp.startswith('+32') %}{% set selected_code = '+32' %}{% set number_value = cp[3:] %}{% endif %}
+      <label>{{ t('customer_phone') }}
+        <div class="phone-row">
+          <select name="customer_phone_code">
+            <option value="+32" {% if selected_code == '+32' %}selected{% endif %}>+32 Belgium</option>
+            <option value="+33" {% if selected_code == '+33' %}selected{% endif %}>+33 France</option>
+            <option value="+31" {% if selected_code == '+31' %}selected{% endif %}>+31 Netherlands</option>
+            <option value="other">Other</option>
+          </select>
+          <input name="customer_phone" value="{{ number_value }}" placeholder="" autocomplete="off">
+        </div>
+      </label>
+      <label>{{ t('customer_email') }}<input name="customer_email" type="email" value="{{ ticket.customer.email or '' }}"></label>
+      <label>Date<input name="due_date" type="date" value="{{ ticket.due_date.strftime('%Y-%m-%d') if ticket.due_date else '' }}"></label>
+      <label>{{ t('status') }}<select name="status">{% for status in statuses %}<option value="{{ status }}" {% if ticket.status == status %}selected{% endif %}>{{ status }}</option>{% endfor %}</select></label>
+      <label class="full">Note<textarea name="issue_description">{{ ticket.issue_description }}</textarea></label>
+    </div>
+    <div id="gsm-items">
+      {% for item in items %}
+      <div class="gsm-item-row">
+        <label>Brand<input name="item_brand[]" value="{{ item.brand }}"></label>
+        <label>Model<input name="item_model[]" value="{{ item.model }}"></label>
+        <label>GB
+          <select name="item_gb[]">
+            <option value="">Select GB</option>
+            {% for gb in ['64 GB','128 GB','256 GB','512 GB','1 TB'] %}
+            <option value="{{ gb }}" {% if item.gb == gb %}selected{% endif %}>{{ gb }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label>IMEI<input name="item_imei[]" value="{{ item.imei }}"></label>
+        <label>Battery %<input name="item_battery[]" type="number" min="0" max="100" step="1" value="{{ item.battery }}"></label>
+        <label>{{ t('serial_number') }}<input name="item_serial[]" value="{{ item.serial }}"></label>
+        <label>Qty<input name="item_qty[]" type="number" min="1" step="1" value="{{ item.qty }}" class="line-qty"></label>
+        <label>Amount<input name="item_amount[]" type="number" min="0" step="0.01" value="{{ item.amount }}" class="line-amount"></label>
+        <div class="line-total-wrap"><strong>Line Total</strong><div class="line-total">€ 0.00</div></div>
+        <button type="button" class="button danger small remove-item">Remove</button>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="stack-actions">
+      <button type="button" id="add-gsm-item" class="button secondary">+ Add Item</button>
+    </div>
+    <div class="card total-card"><strong>Total</strong><div id="gsm-grand-total">€ 0.00</div></div>
+    <div class="stack-actions">
+      <button type="submit">Save Ticket</button>
+      <a class="button secondary" href="{{ url_for('buying_detail', ticket_id=ticket.id) }}">Cancel</a>
+    </div>
+  </form>
+</div>
+<template id="gsm-item-template">
+  <div class="gsm-item-row">
+    <label>Brand<input name="item_brand[]"></label>
+    <label>Model<input name="item_model[]"></label>
+    <label>GB
+      <select name="item_gb[]">
+        <option value="">Select GB</option>
+        <option>64 GB</option><option>128 GB</option><option>256 GB</option><option>512 GB</option><option>1 TB</option>
+      </select>
+    </label>
+    <label>IMEI<input name="item_imei[]"></label>
+    <label>Battery %<input name="item_battery[]" type="number" min="0" max="100" step="1"></label>
+    <label>{{ t('serial_number') }}<input name="item_serial[]"></label>
+    <label>Qty<input name="item_qty[]" type="number" min="1" step="1" value="1" class="line-qty"></label>
+    <label>Amount<input name="item_amount[]" type="number" min="0" step="0.01" value="0" class="line-amount"></label>
+    <div class="line-total-wrap"><strong>Line Total</strong><div class="line-total">€ 0.00</div></div>
+    <button type="button" class="button danger small remove-item">Remove</button>
+  </div>
+</template>
+<script>
+function recalcGsmTotals(){
+  let grand = 0;
+  document.querySelectorAll('.gsm-item-row').forEach(row=>{
+    const qty = parseFloat(row.querySelector('.line-qty')?.value || '1') || 1;
+    const amount = parseFloat(row.querySelector('.line-amount')?.value || '0') || 0;
+    const total = qty * amount;
+    const totalEl = row.querySelector('.line-total');
+    if(totalEl) totalEl.textContent = '€ ' + total.toFixed(2);
+    grand += total;
+  });
+  const grandEl = document.getElementById('gsm-grand-total');
+  if(grandEl) grandEl.textContent = '€ ' + grand.toFixed(2);
+}
+document.addEventListener('input', function(e){
+  if(e.target.matches('.line-qty, .line-amount')) recalcGsmTotals();
+});
+document.addEventListener('click', function(e){
+  if(e.target.id === 'add-gsm-item'){
+    const tpl = document.getElementById('gsm-item-template');
+    document.getElementById('gsm-items').appendChild(tpl.content.cloneNode(true));
+    recalcGsmTotals();
+  }
+  if(e.target.matches('.remove-item')){
+    const rows = document.querySelectorAll('.gsm-item-row');
+    if(rows.length > 1){
+      e.target.closest('.gsm-item-row').remove();
+      recalcGsmTotals();
+    }
+  }
+});
+recalcGsmTotals();
+</script>
+{% endblock %}

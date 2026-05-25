@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ t('customers') }}</h1>
+<div class="grid two">
+  <div class="card">
+    <h2>{{ t('add_customer') }}</h2>
+    <form method="post" class="grid one">
+      <label>{{ t('name') }}<input name="name" required></label>
+      <label>{{ t('phone') }}
+        <div class="phone-row">
+          <select name="phone_code">
+            <option value="+32" selected>+32 Belgium</option>
+            <option value="+33">+33 France</option>
+            <option value="+31">+31 Netherlands</option>
+            <option value="other">Other</option>
+          </select>
+          <input name="phone" required placeholder="476767022">
+        </div>
+      </label>
+      <label>{{ t('email') }}<input name="email" type="email"></label>
+      <button type="submit">{{ t('save_customer') }}</button>
+    </form>
+  </div>
+  <div class="card">
+    {% if current_user.role == 'Company Admin' %}
+    <div class="toolbar-row"><a class="button secondary small" href="{{ url_for('import_template', kind='customers') }}">Download template</a></div>
+    <form method="post" action="{{ url_for('import_customers') }}" enctype="multipart/form-data" class="import-form">
+      <input type="file" name="file" accept=".csv,.xlsx" required>
+      <button type="submit" class="small">Import Customers</button>
+    </form>
+    {% endif %}
+    <h2>{{ t('customer_list') }}</h2>
+    <div class="table-scroll tall">
+    <table>
+      <tr><th>{{ t('name') }}</th><th>{{ t('phone') }}</th><th>{{ t('email') }}</th></tr>
+      {% for customer in customers %}
+      <tr><td>{{ customer.name }}</td><td>{{ customer.phone }}</td><td>{{ customer.email }}</td></tr>
+      {% else %}
+      <tr><td colspan="3">{{ t('no_customers_yet') }}</td></tr>
+      {% endfor %}
+    </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

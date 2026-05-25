@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ t('company_settings') if not super_admin_mode else t('edit') + ' ' + company.name }}</h1>
+{% set cp = company.phone or '' %}
+{% set selected_code = '+32' %}
+{% set number_value = cp %}
+{% if cp.startswith('+33') %}{% set selected_code = '+33' %}{% set number_value = cp[3:] %}{% elif cp.startswith('+31') %}{% set selected_code = '+31' %}{% set number_value = cp[3:] %}{% elif cp.startswith('+32') %}{% set selected_code = '+32' %}{% set number_value = cp[3:] %}{% endif %}
+<div class="card">
+  <form method="post" enctype="multipart/form-data" class="grid two" id="company-settings-form">
+    <label>{{ t('company_name') }}<input name="name" value="{{ company.name }}" required></label>
+    <label>{{ t('phone') }}
+      <div class="phone-row">
+        <select name="phone_code">
+          <option value="+32" {% if selected_code == '+32' %}selected{% endif %}>+32 Belgium</option>
+          <option value="+33" {% if selected_code == '+33' %}selected{% endif %}>+33 France</option>
+          <option value="+31" {% if selected_code == '+31' %}selected{% endif %}>+31 Netherlands</option>
+          <option value="other">Other</option>
+        </select>
+        <input name="phone" value="{{ number_value }}">
+      </div>
+    </label>
+    <label>{{ t('email') }}<input name="email" type="email" value="{{ company.email or '' }}"></label>
+    <label>{{ t('vat_number') }}<input name="vat_number" value="{{ company.vat_number or '' }}"></label>
+    <label class="full">{{ t('address') }}<textarea name="address">{{ company.address or '' }}</textarea></label>
+    <label>{{ t('default_language') }}
+      <select name="default_language">
+        {% for code,label in [('en','English'),('fr','Français'),('nl','Nederlands')] %}
+          <option value="{{ code }}" {% if company.default_language == code %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>{{ t('logo_upload') }}<input id="logo-input" type="file" name="logo" accept=".png,.jpg,.jpeg,.webp,.svg"></label>
+    <div class="full grid three">
+      <label>{{ t('invoice_terms') }} (EN)<textarea name="invoice_terms_en">{{ company.invoice_terms_en or '' }}</textarea></label>
+      <label>{{ t('invoice_terms') }} (FR)<textarea name="invoice_terms_fr">{{ company.invoice_terms_fr or '' }}</textarea></label>
+      <label>{{ t('invoice_terms') }} (NL)<textarea name="invoice_terms_nl">{{ company.invoice_terms_nl or '' }}</textarea></label>
+      <label>{{ t('storage_notice') }} (EN)<textarea name="storage_notice_en">{{ company.storage_notice_en or '' }}</textarea></label>
+      <label>{{ t('storage_notice') }} (FR)<textarea name="storage_notice_fr">{{ company.storage_notice_fr or '' }}</textarea></label>
+      <label>{{ t('storage_notice') }} (NL)<textarea name="storage_notice_nl">{{ company.storage_notice_nl or '' }}</textarea></label>
+    </div>
+    
+    <div class="full card subtle">
+      <h3>GSM Invoice Settings</h3>
+      <div class="grid one">
+        <label>GSM Invoice Title<input name="gsm_invoice_title" value="{{ company.gsm_invoice_title or 'Ticket' }}"></label>
+      </div>
+      <div class="grid three">
+        <label>GSM Terms and Conditions (EN)<textarea name="gsm_terms_en">{{ company.gsm_terms_en or '' }}</textarea></label>
+        <label>GSM Terms and Conditions (FR)<textarea name="gsm_terms_fr">{{ company.gsm_terms_fr or '' }}</textarea></label>
+        <label>GSM Terms and Conditions (NL)<textarea name="gsm_terms_nl">{{ company.gsm_terms_nl or '' }}</textarea></label>
+        <label>GSM Important Notice (EN)<textarea name="gsm_notice_en">{{ company.gsm_notice_en or '' }}</textarea></label>
+        <label>GSM Important Notice (FR)<textarea name="gsm_notice_fr">{{ company.gsm_notice_fr or '' }}</textarea></label>
+        <label>GSM Important Notice (NL)<textarea name="gsm_notice_nl">{{ company.gsm_notice_nl or '' }}</textarea></label>
+      </div>
+    </div>
+
+    <div class="full card subtle">
+      <h3>{{ t('print_tuning_4x6') }}</h3>
+      <div class="grid two">
+        <label>{{ t('print_width_in') }}<input type="number" step="0.01" name="print_width_in" value="{{ company.print_width_in or 3.82 }}"></label>
+        <label>{{ t('print_height_in') }}<input type="number" step="0.01" name="print_height_in" value="{{ company.print_height_in or 5.80 }}"></label>
+        <label>{{ t('print_padding_x_in') }}<input type="number" step="0.01" name="print_padding_x_in" value="{{ company.print_padding_x_in or 0.12 }}"></label>
+        <label>{{ t('print_padding_y_in') }}<input type="number" step="0.01" name="print_padding_y_in" value="{{ company.print_padding_y_in or 0.12 }}"></label>
+        <label>{{ t('print_header_font_px') }}<input type="number" step="1" name="print_header_font_px" value="{{ company.print_header_font_px or 10 }}"></label>
+        <label>{{ t('print_body_font_px') }}<input type="number" step="1" name="print_body_font_px" value="{{ company.print_body_font_px or 11 }}"></label>
+        <label>{{ t('print_notice_font_px') }}<input type="number" step="1" name="print_notice_font_px" value="{{ company.print_notice_font_px or 9 }}"></label>
+        <label>{{ t('print_content_shift_in') }}<input type="number" step="0.01" name="print_content_shift_in" value="{{ company.print_content_shift_in or 0.18 }}"></label>
+      </div>
+      <p class="subtext">{{ t('print_tuning_help') }}</p>
+    </div>
+
+    <div class="full card subtle">
+      <h3>80mm Print Settings</h3>
+      <div class="grid two">
+        <label>80mm Width (mm)<input type="number" step="0.1" name="print_80mm_width_mm" value="{{ company.print_80mm_width_mm or 80 }}"></label>
+        <label>80mm Padding (mm)<input type="number" step="0.1" name="print_80mm_padding_mm" value="{{ company.print_80mm_padding_mm or 5 }}"></label>
+        <label>80mm Header Font (px)<input type="number" step="1" name="print_80mm_header_font_px" value="{{ company.print_80mm_header_font_px or 11 }}"></label>
+        <label>80mm Body Font (px)<input type="number" step="1" name="print_80mm_body_font_px" value="{{ company.print_80mm_body_font_px or 10 }}"></label>
+        <label>80mm Notice Font (px)<input type="number" step="1" name="print_80mm_notice_font_px" value="{{ company.print_80mm_notice_font_px or 9 }}"></label>
+        <label>80mm Content Shift (mm)<input type="number" step="0.1" name="print_80mm_content_shift_mm" value="{{ company.print_80mm_content_shift_mm or 0 }}"></label>
+      </div>
+      <p class="subtext">Use these settings to tune POS-80 receipt width, padding, text size, and spacing.</p>
+    </div>
+
+    <div class="full"><button type="submit">{{ t('save_settings') }}</button></div>
+  </form>
+  {% if company.logo_path %}
+    <p class="subtext">{{ t('current_logo') }}</p>
+    <img class="logo-preview" id="logo-preview" src="{{ url_for('static', filename=company.logo_path) }}" alt="logo">
+  {% else %}
+    <img class="logo-preview" id="logo-preview" alt="logo preview" style="display:none;">
+  {% endif %}
+</div>
+<script>
+const input = document.getElementById('logo-input');
+const preview = document.getElementById('logo-preview');
+if (input) {
+  input.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    preview.src = URL.createObjectURL(file);
+    preview.style.display = 'block';
+  });
+}
+</script>
+{% endblock %}

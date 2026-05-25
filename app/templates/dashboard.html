@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ t('dashboard') }}</h1>
+<div class="stats">
+  <div class="stat"><strong>{{ total_jobs }}</strong><span>{{ label_or_t(app_settings.label_repairs_count if app_settings else None, 'Repairs', 'repairs_count') }}</span></div>
+  <div class="stat"><strong>{{ total_customers }}</strong><span>{{ label_or_t(app_settings.label_customers_count if app_settings else None, 'Customers', 'customers_count') }}</span></div>
+  <div class="stat"><strong>{{ total_parts }}</strong><span>{{ label_or_t(app_settings.label_parts_count if app_settings else None, 'Parts', 'parts_count') }}</span></div>
+  <div class="stat"><strong>{{ total_users }}</strong><span>{{ label_or_t(app_settings.label_users_count if app_settings else None, 'Users', 'users_count') }}</span></div>
+  <div class="stat"><strong>{{ low_stock }}</strong><span>{{ label_or_t(app_settings.label_low_stock if app_settings else None, 'Low Stock', 'low_stock') }}</span></div>
+  <div class="stat"><strong>{{ overdue_repairs }}</strong><span>{{ label_or_t(app_settings.label_overdue_repairs if app_settings else None, 'Overdue Repairs', 'overdue_repairs') }}</span></div>
+  <div class="stat"><strong>{{ todays_repairs }}</strong><span>{{ app_settings.label_todays_repairs if app_settings and app_settings.label_todays_repairs != "Today's repairs" else t('todays_repairs') if t('todays_repairs') != 'todays_repairs' else "Today's repairs" }}</span></div>
+  <div class="stat"><strong>{{ total_gsm }}</strong><span>GSM Tickets</span></div>
+  <div class="stat"><strong>{{ todays_gsm }}</strong><span>Today's GSM</span></div>
+</div>
+<div class="card">
+  <h2>Recent GSM</h2>
+  <div class="table-scroll short">
+    <table>
+      <tr><th>Ticket</th><th>Customer</th><th>Device</th><th>Status</th><th>Action</th></tr>
+      {% for ticket in recent_gsm %}
+      <tr>
+        <td><strong>{{ ticket.ticket_code }}</strong><br><span class="subtext">{{ ticket.invoice_number }}</span></td>
+        <td>{{ ticket.customer.name }}<br><span class="subtext">{{ ticket.customer.phone }}</span></td>
+        <td>{% set first = ticket_items(ticket)[0] if ticket_items(ticket) else None %}{% if first %}{{ format_gsm_description(first) }}{% else %}{{ ticket.device_brand }} {{ ticket.device_model }}{% endif %}</td>
+        <td>{{ ticket.status }}</td>
+        <td class="actions-inline"><a class="button small" href="{{ url_for('buying_detail', ticket_id=ticket.id) }}">Open</a><a class="button small secondary" href="{{ url_for('print_buying_invoice', ticket_id=ticket.id, size='80mm') }}">Print</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5">No GSM tickets yet.</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+<div class="card">
+  <form method="get" class="searchrow">
+    <input name="q" value="{{ q }}" placeholder="{{ app_settings.label_search_placeholder if app_settings and app_settings.label_search_placeholder != 'Search by phone / repair ID / serial / IMEI / customer' else t('search_placeholder') if t('search_placeholder') != 'search_placeholder' else 'Search by phone / repair ID / serial / IMEI / customer' }}">
+    <button type="submit">{{ t('search') }}</button>
+  </form>
+</div>
+<div class="grid three">
+  {% for status, count in status_counts.items() %}
+  <div class="card subtle">
+    <h3>{{ status_label(status) }}</h3>
+    <div class="big-number">{{ count }}</div>
+  </div>
+  {% endfor %}
+</div>
+<div class="grid two">
+  <div class="card">
+    <h2>{{ label_or_t(app_settings.label_recent_payments if app_settings else None, 'Recent payments', 'recent_payments') }}</h2>
+    <div class="table-scroll short">
+      <table>
+        <tr><th>{{ t('when') }}</th><th>{{ t('repair') }}</th><th>{{ t('method') }}</th><th>{{ t('amount') }}</th></tr>
+        {% for item in recent_payments %}<tr><td>{{ item.created_at.strftime('%Y-%m-%d %H:%M') }}</td><td>{{ item.repair_job.repair_code }}</td><td>{{ item.method }}</td><td>€ {{ '%.2f'|format(item.amount) }}</td></tr>{% else %}<tr><td colspan="4">{{ t('no_payments_yet') if t('no_payments_yet') != 'no_payments_yet' else 'No payments yet.' }}</td></tr>{% endfor %}
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <h2>{{ label_or_t(app_settings.label_recent_activity if app_settings else None, 'Recent activity', 'recent_activity') }}</h2>
+    <div class="table-scroll short">
+      <table>
+        <tr><th>{{ t('when') }}</th><th>{{ t('type') }}</th><th>{{ t('detail') }}</th></tr>
+        {% for a in recent_activity %}<tr><td>{{ a.when.strftime('%Y-%m-%d %H:%M') }}</td><td>{{ a.kind }}</td><td><strong>{{ a.title }}</strong>{% if a.detail %}<br><span class="subtext">{{ a.detail }}</span>{% endif %}</td></tr>{% else %}<tr><td colspan="3">{{ t('no_activity_yet') if t('no_activity_yet') != 'no_activity_yet' else 'No activity yet.' }}</td></tr>{% endfor %}
+      </table>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <h2>{{ label_or_t(app_settings.label_recent_repairs if app_settings else None, 'Recent Repairs', 'recent_repairs') }}</h2>
+  <div class="table-scroll medium">
+    <table>
+      <tr><th>{{ label_or_t(app_settings.label_repair_code if app_settings else None, 'Repair Code', 'repair_code') }}</th><th>{{ label_or_t(app_settings.label_customer if app_settings else None, 'Customer', 'customer') }}</th><th>{{ label_or_t(app_settings.label_device if app_settings else None, 'Device', 'device') }}</th><th>{{ label_or_t(app_settings.label_status if app_settings else None, 'Status', 'status') }}</th><th>{{ label_or_t(app_settings.label_action if app_settings else None, 'Action', 'action') }}</th></tr>
+      {% for job in jobs %}
+      <tr>
+        <td><strong>{{ job.repair_code }}</strong><br><span class="subtext">{{ job.invoice_number }}</span></td>
+        <td>{{ job.customer.name }}<br><span class="subtext">{{ job.customer.phone }}</span></td>
+        <td>{{ job.device_brand }} {{ job.device_model }}{% if job.imei %}<br><span class="subtext">IMEI: {{ job.imei }}</span>{% endif %}</td>
+        <td>{{ status_label(job.status) }}</td>
+        <td class="actions-inline"><a class="button small" href="{{ url_for('repair_detail', repair_id=job.id) }}">{{ label_or_t(app_settings.label_open if app_settings else None, 'Open', 'open') }}</a><a class="button small secondary" href="{{ url_for('print_invoice', repair_id=job.id, size='80mm') }}">{{ t('print_invoice') }}</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5">{{ t('no_repair_jobs_yet') }}</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}

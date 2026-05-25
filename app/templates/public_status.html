@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Repair Status</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+</head>
+<body>
+  <main class="container">
+    <div class="card narrow">
+      <h1>Repair Status</h1>
+      <form method="get" class="grid one">
+        <label>Repair Code<input name="repair" value="{{ repair_code }}" placeholder="REP-01-0001"></label>
+        <label>or Customer Phone<input name="phone" value="{{ phone }}" placeholder="+324... or 047..."></label>
+        <button type="submit">Check status</button>
+      </form>
+      {% if repair %}
+      <hr>
+      <h2>{{ repair.repair_code }}</h2>
+      <p><strong>Customer:</strong> {{ repair.customer.name }}</p>
+      <p><strong>Device:</strong> {{ repair.device_brand }} {{ repair.device_model }}</p>
+      <p><strong>Status:</strong> {{ status_label(repair.status) }}</p>
+      <p><strong>Created:</strong> {{ repair.created_at.strftime('%Y-%m-%d') }}</p>
+      {% if repair.customer_note %}<p><strong>Note:</strong> {{ repair.customer_note }}</p>{% endif %}
+      {% elif repair_code or phone %}
+      <p class="alert danger">No matching repair found.</p>
+      {% endif %}
+    </div>
+  </main>
+</body>
+</html>

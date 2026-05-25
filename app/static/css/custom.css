@@ -1,0 +1,459 @@
+:root { --bg:#f5f7fb; --card:#fff; --text:#172033; --muted:#687084; --border:#d9dfec; --primary:#38bdf8; --accent:#0f172a; --danger:#c62828; }
+* { box-sizing:border-box; }
+body { margin:0; font-family:Arial, Helvetica, sans-serif; background:var(--bg); color:var(--text); }
+a { color:inherit; text-decoration:none; }
+.topbar { display:flex; justify-content:space-between; align-items:center; padding:14px 22px; background:#fff; border-bottom:1px solid var(--border); gap:14px; }
+.brand { display:flex; align-items:center; gap:12px; }
+.brand img { width:42px; height:42px; object-fit:contain; border-radius:8px; background:#fff; }
+nav { display:flex; gap:12px; flex-wrap:wrap; }
+nav a { padding:8px 10px; border-radius:8px; }
+nav a:hover { background:#eef3ff; color:var(--primary); }
+.container { max-width:1200px; margin:24px auto; padding:0 16px; }
+.card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:18px; margin-bottom:18px; }
+.narrow { max-width:460px; margin:40px auto; }
+h1,h2,h3 { margin-top:0; }
+.grid { display:grid; gap:18px; }
+.grid.two { grid-template-columns:1fr 1fr; }
+.grid.one { grid-template-columns:1fr; }
+.full { grid-column:1 / -1; }
+label { display:flex; flex-direction:column; gap:8px; font-size:14px; }
+input, textarea, select, button { font:inherit; }
+input, textarea, select { width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:10px; background:#fff; }
+textarea { min-height:90px; resize:vertical; }
+button, .button { display:inline-block; background:var(--primary); color:#fff; border:none; border-radius:10px; padding:10px 14px; cursor:pointer; }
+.button.secondary { background:#eef3ff; color:var(--accent); }
+button.small, .button.small { padding:6px 10px; font-size:13px; }
+button.danger { background:var(--danger); }
+.alert { padding:12px 14px; border-radius:10px; margin-bottom:12px; }
+.alert.success { background:#e8f5e9; }
+.alert.danger { background:#ffebee; }
+.alert.warning { background:#fff4e5; }
+.stats { display:grid; grid-template-columns:repeat(auto-fit, minmax(140px,1fr)); gap:12px; margin-bottom:18px; }
+.stat { background:#fff; border:1px solid var(--border); border-radius:16px; padding:16px; display:flex; flex-direction:column; gap:4px; }
+.stat strong { font-size:24px; }
+.subtext { color:var(--muted); font-size:13px; }
+table { width:100%; border-collapse:collapse; }
+th, td { padding:10px 8px; border-bottom:1px solid var(--border); vertical-align:top; text-align:left; }
+.actions-inline { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.searchrow { display:flex; gap:10px; }
+.logo-preview { max-height:90px; object-fit:contain; }
+
+.print-body { background:#fff; }
+.invoice-toolbar { max-width:980px; margin:20px auto 10px; padding:0 12px; display:flex; gap:10px; flex-wrap:wrap; }
+.invoice-page { background:#fff; color:#000; margin:0 auto 20px; border:1px solid #ddd; width:100%; }
+.invoice-page.size-a4 { width:210mm; min-height:297mm; padding:18mm 16mm; }
+.invoice-page.size-4x6 { width:var(--company-print-width, 3.82in); height:var(--company-print-height, 5.80in); min-height:var(--company-print-height, 5.80in); max-height:var(--company-print-height, 5.80in); padding:var(--company-pad-y, 0.12in) var(--company-pad-x, 0.12in); display:flex; flex-direction:column; font-size:var(--company-body-font, 11px); overflow:hidden; }
+.invoice-page.size-80mm { width:80mm; min-height:180mm; padding:6mm; display:flex; flex-direction:column; }
+.invoice-header { margin-bottom:6px; }
+.brandline { display:flex; align-items:flex-start; gap:12px; }
+.brandline img { width:44px; height:44px; object-fit:contain; flex:0 0 auto; }
+.brandline h1 { font-size:18px; margin:0 0 2px; }
+.invoice-title { margin-top:6px; font-weight:700; letter-spacing:.08em; font-size:14px; }
+.invoice-grid { display:grid; grid-template-columns:1fr 1fr; gap:4px 10px; font-size:12px; margin-bottom:8px; }
+.invoice-stretch { display:flex; flex-direction:column; flex:1; justify-content:space-between; gap:8px; min-height:0; }
+.lineitem-head, .lineitem { display:grid; grid-template-columns:minmax(0,1fr) 40px 76px 84px; gap:6px; font-size:12px; align-items:start; }
+.lineitem-head { border-bottom:1px solid #000; padding-bottom:3px; font-weight:700; }
+.lineitem { padding:4px 0; border-bottom:1px dashed #bbb; }
+.lineitem span:nth-child(2), .lineitem-head span:nth-child(2) { text-align:center; }
+.lineitem span:nth-child(3), .lineitem-head span:nth-child(3), .lineitem span:nth-child(4), .lineitem-head span:nth-child(4) { text-align:right; }
+.totals-row { display:flex; justify-content:space-between; padding:2px 0; font-size:12px; }
+.totals-row.total { border-top:1px solid #000; padding-top:5px; margin-top:5px; font-weight:700; }
+.terms.compact, .notice.compact { border:1px solid #000; padding:5px; font-size:10px; margin-top:6px; }
+.terms.compact strong, .notice.compact strong { display:block; margin-bottom:4px; }
+
+/* Balanced 4x6 presentation that fits one label */
+.invoice-page.size-4x6 .brandline img { width:40px; height:40px; }
+.invoice-page.size-4x6 .brandline h1 { font-size:17px; }
+.invoice-page.size-4x6 .brandline div { font-size:10px; line-height:1.2; }
+.invoice-page.size-4x6 .invoice-title { font-size:12px; margin-top:4px; }
+.invoice-page.size-4x6 .repair-id-large { font-size:18px; }
+.invoice-page.size-4x6 .invoice-grid { font-size:11px; gap:3px 10px; }
+.invoice-page.size-4x6 .invoice-stretch { justify-content:flex-start; gap:0; }
+.invoice-page.size-4x6 .invoice-stretch > div:first-child { margin-top:0.34in; }
+.invoice-page.size-4x6 .lineitem-head,
+.invoice-page.size-4x6 .lineitem { grid-template-columns:minmax(0,1fr) 28px 54px 62px; font-size:11px; }
+.invoice-page.size-4x6 .invoice-bottom-block { margin-top:0.42in; }
+.invoice-page.size-4x6 .totals-row { font-size:11px; padding:2px 0; }
+.invoice-page.size-4x6 .terms.compact,
+.invoice-page.size-4x6 .notice.compact { font-size:9px; padding:5px; margin-top:5px; }
+
+@media (max-width: 900px) { .grid.two { grid-template-columns:1fr; } }
+
+@media print {
+  .no-print, .topbar, .container > :not(.invoice-page) { display:none !important; }
+  body { background:#fff; margin:0; padding:0; }
+  .invoice-page { border:none; margin:0; box-shadow:none; }
+  body.print-size-4x6 .invoice-page.size-4x6 { width:4in; height:6in; min-height:6in; max-height:6in; }
+  body.print-size-80mm .invoice-page.size-80mm { width:80mm; min-height:180mm; }
+  body.print-size-a4 .invoice-page.size-a4 { width:210mm; min-height:297mm; }
+}
+
+.repair-id-display { font-size: 28px; font-weight: 800; letter-spacing: .02em; }
+.repair-id-large { font-size: 18px; font-weight: 800; }
+.repair-id-row { grid-column: 1 / -1; }
+select:disabled, button:disabled { opacity:.65; cursor:not-allowed; }
+.profile-grid { max-width:640px; }
+
+.invoice-page .brandline > div { min-width:0; word-break:break-word; overflow-wrap:anywhere; }
+.invoice-page .brandline > div div { overflow-wrap:anywhere; word-break:break-word; }
+.invoice-page.size-4x6 .brandline { gap:8px; align-items:flex-start; }
+.invoice-page.size-4x6 .brandline h1 { font-size:calc(var(--company-header-font, 10px) + 5px); line-height:1.05; }
+.invoice-page.size-4x6 .brandline div { font-size:var(--company-header-font, 10px); line-height:1.15; }
+.invoice-page.size-4x6 .invoice-grid { font-size:var(--company-body-font, 11px); gap:3px 10px; }
+.invoice-page.size-4x6 .invoice-title { font-size:calc(var(--company-header-font, 10px) + 2px); margin-top:4px; }
+.invoice-page.size-4x6 .repair-id-large { font-size:calc(var(--company-body-font, 11px) + 8px); }
+.invoice-page.size-4x6 .invoice-stretch { justify-content:flex-start; gap:0; }
+.invoice-page.size-4x6 .invoice-stretch > div:first-child { margin-top:var(--company-content-shift, 0.18in); }
+.invoice-page.size-4x6 .lineitem-head, .invoice-page.size-4x6 .lineitem { grid-template-columns:minmax(0,1fr) 28px 54px 62px; font-size:var(--company-body-font, 11px); }
+.invoice-page.size-4x6 .invoice-bottom-block { margin-top:calc(var(--company-content-shift, 0.18in) + 0.14in); }
+.invoice-page.size-4x6 .totals-row { font-size:var(--company-body-font, 11px); padding:2px 0; }
+.invoice-page.size-4x6 .terms.compact, .invoice-page.size-4x6 .notice.compact { font-size:var(--company-notice-font, 9px); padding:4px; margin-top:4px; overflow-wrap:anywhere; word-break:break-word; }
+.invoice-page.size-4x6 .lineitem, .invoice-page.size-4x6 .lineitem-head, .invoice-page.size-4x6 .totals-row { width:100%; }
+.invoice-page.size-4x6 .terms.compact div, .invoice-page.size-4x6 .notice.compact div { line-height:1.15; }
+@media print { body.print-size-4x6 .invoice-page.size-4x6 { width:var(--company-print-width, 3.82in); height:var(--company-print-height, 5.80in); min-height:var(--company-print-height, 5.80in); max-height:var(--company-print-height, 5.80in); } }
+.card.subtle { background:#f8faff; }
+.checkline { flex-direction:row; align-items:center; gap:10px; }
+.checkline input { width:auto; }
+.grid.three { grid-template-columns:repeat(3,1fr); }
+.support-float { position:fixed; right:18px; bottom:18px; background:var(--primary); color:#fff; padding:12px 16px; border-radius:999px; box-shadow:0 8px 18px rgba(0,0,0,.16); z-index:50; }
+.stack-actions { display:flex; gap:10px; flex-wrap:wrap; }
+.qr-wrap { display:flex; align-items:center; gap:10px; margin-top:6px; }
+.qr-wrap img { width:62px; height:62px; object-fit:contain; }
+.invoice-page.size-4x6 .qr-wrap img { width:54px; height:54px; }
+@media (max-width:900px){ .grid.three { grid-template-columns:1fr; } }
+
+.toolbar-row{display:flex;justify-content:flex-end;gap:.5rem;margin-bottom:.75rem}
+.import-form{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:1rem}
+.import-form input[type=file]{max-width:100%}
+
+.brand strong { color: var(--accent); }
+
+hr { border:none; border-top:1px solid var(--border); margin:16px 0; }
+nav a.active, nav a[aria-current='page'] { background:#eef8ff; color:var(--primary); }
+button:hover, .button:hover { opacity:.92; }
+.card h2 { margin-bottom:12px; }
+.info-list p { margin:.35rem 0; }
+.report-actions { align-items:end; }
+.barcode-wrap img { width:100%; max-width:220px; height:44px; object-fit:contain; }
+.invoice-page.size-4x6 .barcode-wrap img { max-width:180px; height:34px; }
+.import-group { border-top:1px solid var(--border); padding-top:12px; margin-top:12px; }
+.inline-form { display:inline; }
+.actions-inline form { margin:0; }
+.subtle .big-number { font-size:28px; font-weight:800; }
+textarea, input, select { transition:border-color .15s ease, box-shadow .15s ease; }
+textarea:focus, input:focus, select:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(56,189,248,.15); outline:none; }
+
+.phone-row{display:flex;gap:8px;align-items:center}.phone-row select{max-width:180px}.payment-edit-row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:center}.danger{background:#b91c1c!important;color:#fff!important}
+
+.table-scroll{overflow:auto;border:1px solid var(--border);border-radius:12px;}
+.table-scroll table{min-width:100%;margin:0;}
+.table-scroll.short{max-height:220px;}
+.table-scroll.medium{max-height:420px;}
+.table-scroll.tall{max-height:620px;}
+.flow-text{overflow-wrap:anywhere;word-break:break-word;white-space:normal;line-height:1.2;}
+.invoice-page.size-80mm .terms.compact,.invoice-page.size-80mm .notice.compact{font-size:10px;overflow-wrap:anywhere;word-break:break-word;}
+.invoice-page.size-80mm .flow-text{overflow-wrap:anywhere;word-break:break-word;}
+.invoice-page.size-80mm .invoice-grid,.invoice-page.size-80mm .lineitem-head,.invoice-page.size-80mm .lineitem,.invoice-page.size-80mm .totals-row{font-size:11px;}
+
+
+/* Invoice layout stabilization fixes */
+.invoice-page .nowrap{white-space:nowrap;word-break:normal;overflow-wrap:normal;}
+.invoice-page .stack-break{display:block;}
+.invoice-page .invoice-grid > div{min-width:0;overflow-wrap:anywhere;word-break:break-word;}
+.invoice-page .invoice-grid .field-value{display:inline-block;min-width:0;overflow-wrap:anywhere;word-break:break-word;vertical-align:top;}
+.invoice-page .repair-id-large,.invoice-page .repair-code-value,.invoice-page .barcode-text{white-space:nowrap;word-break:normal;overflow-wrap:normal;letter-spacing:0;}
+.invoice-page .invoice-header,.invoice-page .invoice-bottom-block{min-width:0;}
+.invoice-page .brandline > div{flex:1 1 auto;}
+.invoice-page .brandline{min-width:0;}
+.invoice-page .qr-wrap .subtext{line-height:1.15;}
+.invoice-page .invoice-title{word-break:keep-all;}
+.invoice-page.size-4x6{padding:0.11in 0.11in;}
+.invoice-page.size-4x6 .invoice-header{margin-bottom:4px;}
+.invoice-page.size-4x6 .brandline img{width:34px;height:34px;}
+.invoice-page.size-4x6 .brandline{gap:6px;}
+.invoice-page.size-4x6 .brandline h1{font-size:15px;line-height:1.05;margin-bottom:1px;}
+.invoice-page.size-4x6 .brandline div{font-size:9px;line-height:1.12;}
+.invoice-page.size-4x6 .invoice-title{font-size:11px;letter-spacing:.04em;margin-top:3px;}
+.invoice-page.size-4x6 .invoice-grid{grid-template-columns:1fr 1fr;gap:2px 8px;font-size:10px;margin-bottom:5px;}
+.invoice-page.size-4x6 .repair-id-row{margin-bottom:1px;}
+.invoice-page.size-4x6 .repair-id-large{font-size:16px;}
+.invoice-page.size-4x6 .lineitem-head,.invoice-page.size-4x6 .lineitem{grid-template-columns:minmax(0,1fr) 26px 48px 56px;gap:4px;font-size:10px;}
+.invoice-page.size-4x6 .lineitem{padding:3px 0;}
+.invoice-page.size-4x6 .invoice-stretch>div:first-child{margin-top:0.10in;}
+.invoice-page.size-4x6 .invoice-bottom-block{margin-top:0.12in;}
+.invoice-page.size-4x6 .totals-row{font-size:10px;padding:1px 0;}
+.invoice-page.size-4x6 .qr-wrap{gap:6px;margin-top:4px;align-items:flex-start;}
+.invoice-page.size-4x6 .qr-wrap img{width:40px;height:40px;}
+.invoice-page.size-4x6 .barcode-wrap img{max-width:120px;height:26px;}
+.invoice-page.size-4x6 .terms.compact,.invoice-page.size-4x6 .notice.compact{font-size:8.2px;line-height:1.12;padding:4px;margin-top:4px;}
+.invoice-page.size-80mm{width:80mm;min-height:auto;padding:4mm;display:flex;flex-direction:column;font-size:11px;overflow:hidden;}
+.invoice-page.size-80mm .invoice-header{margin-bottom:4px;}
+.invoice-page.size-80mm .brandline{gap:6px;align-items:flex-start;}
+.invoice-page.size-80mm .brandline img{width:28px;height:28px;}
+.invoice-page.size-80mm .brandline h1{font-size:12px;line-height:1.05;margin-bottom:1px;}
+.invoice-page.size-80mm .brandline div{font-size:8px;line-height:1.1;}
+.invoice-page.size-80mm .invoice-title{font-size:10px;letter-spacing:.04em;margin-top:3px;}
+.invoice-page.size-80mm .invoice-grid{grid-template-columns:1fr 1fr;gap:2px 6px;font-size:9px;margin-bottom:5px;}
+.invoice-page.size-80mm .repair-id-large{font-size:11px;}
+.invoice-page.size-80mm .lineitem-head,.invoice-page.size-80mm .lineitem{grid-template-columns:minmax(0,1fr) 22px 38px 46px;gap:3px;font-size:9px;}
+.invoice-page.size-80mm .lineitem{padding:2px 0;}
+.invoice-page.size-80mm .totals-row{font-size:9px;padding:1px 0;}
+.invoice-page.size-80mm .qr-wrap{gap:6px;margin-top:4px;align-items:flex-start;}
+.invoice-page.size-80mm .qr-wrap img{width:34px;height:34px;}
+.invoice-page.size-80mm .barcode-wrap img{max-width:110px;height:22px;}
+.invoice-page.size-80mm .terms.compact,.invoice-page.size-80mm .notice.compact{font-size:7.8px;line-height:1.1;padding:4px;margin-top:4px;}
+.invoice-page.size-80mm .subtext{font-size:8px;}
+@media print{
+  body.print-size-80mm .invoice-page.size-80mm{width:80mm;padding:4mm;}
+  body.print-size-4x6 .invoice-page.size-4x6{padding:0.11in;}
+}
+
+.buying-actions{display:flex;flex-direction:column;gap:6px;align-items:flex-start;min-width:100px}.buying-actions .small{display:inline-flex;justify-content:center;min-width:72px}.buying-actions form{margin:0}
+
+.buying-actions{display:flex;flex-direction:column;gap:8px;align-items:stretch;min-width:110px}.buying-actions .button{width:100%;text-align:center}.buying-actions form{width:100%;margin:0}.buying-actions form .button{width:100%}
+
+
+.gsm-item-row{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:12px;align-items:end;margin:12px 0;padding:12px;border:1px solid #d7e0ea;border-radius:12px;background:#fbfdff}
+.gsm-item-row .line-total-wrap{padding:8px 10px;border:1px solid #d7e0ea;border-radius:10px;background:#fff;min-height:56px}
+.total-card{margin-top:8px}
+.small{padding:6px 12px;font-size:.92rem}
+.stack-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+@media (max-width: 900px){.gsm-item-row{grid-template-columns:repeat(2,minmax(120px,1fr));}}
+
+
+/* GSM print: 4-column line items */
+.invoice-page .lineitem-head,
+.invoice-page .lineitem{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 60px 90px 90px;
+  gap:8px;
+  align-items:start;
+}
+.invoice-page .lineitem-head span:nth-child(n+2),
+.invoice-page .lineitem span:nth-child(n+2){
+  text-align:right;
+}
+
+
+/* Final GSM ticket print alignment fix */
+.invoice-page .lineitem-head,
+.invoice-page .lineitem{
+  width:100%;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 40px 76px 84px;
+  gap:6px;
+  align-items:start;
+}
+.invoice-page .lineitem-head span:nth-child(1),
+.invoice-page .lineitem span:nth-child(1){
+  min-width:0;
+  word-break:break-word;
+}
+.invoice-page .lineitem-head span:nth-child(2),
+.invoice-page .lineitem span:nth-child(2){
+  text-align:center;
+}
+.invoice-page .lineitem-head span:nth-child(3),
+.invoice-page .lineitem-head span:nth-child(4),
+.invoice-page .lineitem span:nth-child(3),
+.invoice-page .lineitem span:nth-child(4){
+  text-align:right;
+}
+.invoice-page.size-4x6 .lineitem-head,
+.invoice-page.size-4x6 .lineitem{
+  grid-template-columns:minmax(0,1fr) 26px 48px 56px;
+  gap:4px;
+  font-size:10px;
+}
+.invoice-page.size-80mm .lineitem-head,
+.invoice-page.size-80mm .lineitem{
+  grid-template-columns:minmax(0,1fr) 22px 38px 46px;
+  gap:3px;
+  font-size:9px;
+}
+
+
+/* Multi-device repair form */
+.dynamic-items { display:flex; flex-direction:column; gap:12px; margin:10px 0 16px; }
+.repair-item-row {
+  display:grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap:10px;
+  padding:12px;
+  border:1px solid #d7e0ef;
+  border-radius:12px;
+  background:#fff;
+}
+.repair-item-row label { margin:0; }
+.repair-item-row .wide { grid-column: span 2; }
+.repair-item-row .remove-repair-item { align-self:end; }
+@media (max-width: 900px) {
+  .repair-item-row { grid-template-columns:1fr 1fr; }
+  .repair-item-row .wide { grid-column: span 2; }
+}
+@media (max-width: 600px) {
+  .repair-item-row { grid-template-columns:1fr; }
+  .repair-item-row .wide { grid-column: span 1; }
+}
+
+/* Compact repair 80mm print */
+.invoice-page.size-80mm {
+  height:auto !important;
+  min-height:auto !important;
+  max-height:none !important;
+}
+@media print {
+  body.print-size-80mm .invoice-page.size-80mm {
+    height:auto !important;
+    min-height:auto !important;
+    max-height:none !important;
+  }
+}
+
+
+/* Final repair/GSM 80mm print tuning */
+.invoice-page.size-80mm {
+  width: var(--company-80mm-width, 80mm) !important;
+  min-height: auto !important;
+  height: auto !important;
+  max-height: none !important;
+  padding: var(--company-80mm-padding, 4mm) !important;
+  font-size: var(--company-80mm-body-font, 9px) !important;
+  overflow: visible !important;
+}
+.invoice-page.size-80mm .invoice-header { margin-bottom: 3px !important; }
+.invoice-page.size-80mm .brandline { gap: 5px !important; }
+.invoice-page.size-80mm .brandline img { width: 24px !important; height: 24px !important; }
+.invoice-page.size-80mm .brandline h1 { font-size: calc(var(--company-80mm-header-font, 9px) + 2px) !important; line-height: 1.05 !important; }
+.invoice-page.size-80mm .brandline div { font-size: var(--company-80mm-header-font, 9px) !important; line-height: 1.08 !important; }
+.invoice-page.size-80mm .invoice-title { font-size: calc(var(--company-80mm-header-font, 9px) + 1px) !important; margin-top: 2px !important; }
+.invoice-page.size-80mm .invoice-grid { font-size: var(--company-80mm-body-font, 9px) !important; gap: 1px 5px !important; margin-bottom: 4px !important; }
+.invoice-page.size-80mm .repair-id-large { font-size: calc(var(--company-80mm-body-font, 9px) + 3px) !important; }
+.invoice-page.size-80mm .invoice-stretch { gap: 0 !important; justify-content: flex-start !important; }
+.invoice-page.size-80mm .invoice-stretch > div:first-child { margin-top: var(--company-80mm-shift, 0mm) !important; }
+.invoice-page.size-80mm .lineitem-head,
+.invoice-page.size-80mm .lineitem {
+  grid-template-columns: minmax(0, 1fr) 20px 45px 52px !important;
+  gap: 3px !important;
+  font-size: var(--company-80mm-body-font, 9px) !important;
+  line-height: 1.15 !important;
+}
+.invoice-page.size-80mm .lineitem { padding: 2px 0 !important; }
+.invoice-page.size-80mm .invoice-bottom-block { margin-top: 5px !important; }
+.invoice-page.size-80mm .totals-row { font-size: var(--company-80mm-body-font, 9px) !important; padding: 1px 0 !important; }
+.invoice-page.size-80mm .qr-wrap { margin-top: 4px !important; gap: 5px !important; }
+.invoice-page.size-80mm .qr-wrap img { width: 32px !important; height: 32px !important; }
+.invoice-page.size-80mm .barcode-wrap img { max-width: 105px !important; height: 22px !important; }
+.invoice-page.size-80mm .terms.compact,
+.invoice-page.size-80mm .notice.compact {
+  font-size: var(--company-80mm-notice-font, 8px) !important;
+  line-height: 1.08 !important;
+  padding: 3px !important;
+  margin-top: 4px !important;
+}
+@media print {
+  body.print-size-80mm .invoice-page.size-80mm {
+    width: var(--company-80mm-width, 80mm) !important;
+    min-height: auto !important;
+    height: auto !important;
+    max-height: none !important;
+    padding: var(--company-80mm-padding, 4mm) !important;
+  }
+}
+
+
+/* Final recent feedback fixes: repair ticket alignment + clearer 80mm print */
+.invoice-page.repair-invoice .lineitem-head,
+.invoice-page.repair-invoice .lineitem {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 34px 76px !important;
+  gap: 6px !important;
+  align-items: start !important;
+}
+.invoice-page.repair-invoice .lineitem-head span:nth-child(1),
+.invoice-page.repair-invoice .lineitem span:nth-child(1) {
+  text-align: left !important;
+  min-width: 0 !important;
+  word-break: break-word !important;
+}
+.invoice-page.repair-invoice .lineitem-head span:nth-child(2),
+.invoice-page.repair-invoice .lineitem span:nth-child(2) {
+  text-align: center !important;
+}
+.invoice-page.repair-invoice .lineitem-head span:nth-child(3),
+.invoice-page.repair-invoice .lineitem span:nth-child(3) {
+  text-align: right !important;
+}
+.invoice-page.repair-invoice.size-4x6 .lineitem-head,
+.invoice-page.repair-invoice.size-4x6 .lineitem {
+  grid-template-columns: minmax(0, 1fr) 28px 64px !important;
+  font-size: 10.5px !important;
+  gap: 4px !important;
+}
+.invoice-page.repair-invoice.size-80mm {
+  width: var(--company-80mm-width, 80mm) !important;
+  min-height: 250mm !important;
+  height: auto !important;
+  padding: var(--company-80mm-padding, 5mm) !important;
+  font-size: var(--company-80mm-body-font, 10px) !important;
+}
+.invoice-page.repair-invoice.size-80mm .brandline img {
+  width: 28px !important;
+  height: 28px !important;
+}
+.invoice-page.repair-invoice.size-80mm .brandline h1 {
+  font-size: calc(var(--company-80mm-header-font, 11px) + 2px) !important;
+}
+.invoice-page.repair-invoice.size-80mm .brandline div,
+.invoice-page.repair-invoice.size-80mm .invoice-grid,
+.invoice-page.repair-invoice.size-80mm .totals-row {
+  font-size: var(--company-80mm-body-font, 10px) !important;
+  line-height: 1.2 !important;
+}
+.invoice-page.repair-invoice.size-80mm .lineitem-head,
+.invoice-page.repair-invoice.size-80mm .lineitem {
+  grid-template-columns: minmax(0, 1fr) 24px 58px !important;
+  gap: 4px !important;
+  font-size: var(--company-80mm-body-font, 10px) !important;
+  line-height: 1.18 !important;
+}
+.invoice-page.repair-invoice.size-80mm .terms.compact,
+.invoice-page.repair-invoice.size-80mm .notice.compact {
+  font-size: var(--company-80mm-notice-font, 9px) !important;
+  line-height: 1.18 !important;
+}
+@media print {
+  body.print-size-80mm .invoice-page.repair-invoice.size-80mm {
+    min-height: 250mm !important;
+    height: auto !important;
+  }
+}
+
+
+/* Repair print clean summary */
+.repair-print-summary {
+  margin-bottom: 8px;
+}
+.invoice-page.repair-invoice .invoice-stretch {
+  width: 100%;
+}
+
+
+/* Main repair code under invoice title */
+.repair-code-main {
+  font-weight: 800;
+  font-size: 18px;
+  line-height: 1.1;
+  margin-top: 3px;
+  margin-bottom: 6px;
+}
+.invoice-page.size-80mm .repair-code-main {
+  font-size: 14px !important;
+  margin-top: 2px !important;
+  margin-bottom: 4px !important;
+}
+.invoice-page.size-4x6 .repair-code-main {
+  font-size: 16px !important;
+  margin-top: 2px !important;
+  margin-bottom: 5px !important;
+}

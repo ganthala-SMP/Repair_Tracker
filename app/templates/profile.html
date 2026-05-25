@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ t('profile') }}</h1>
+<div class="card profile-grid">
+  <form method="post" class="grid one">
+    <label>{{ t('name') }}
+      <input name="name" value="{{ user.name }}" required>
+    </label>
+    <label>{{ t('email') }}
+      <input type="email" name="email" value="{{ user.email }}" required>
+    </label>
+    <label>Current Password
+      <input type="password" name="current_password">
+    </label>
+    <label>{{ t('new_password_optional') }}
+      <input type="password" name="password">
+    </label>
+    <label>{{ t('confirm_password') }}
+      <input type="password" name="confirm_password">
+    </label>
+    <p class="subtext">Leave the new password fields blank to keep your current password.</p>
+    <button type="submit">{{ t('save_changes') }}</button>
+  </form>
+</div>
+{% endblock %}

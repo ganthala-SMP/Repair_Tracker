@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ t('master_settings') }}</h1>
+{% set sw = settings.support_whatsapp or '' %}
+{% set support_code = '+32' %}
+{% set support_number = sw %}
+{% if sw.startswith('+33') %}{% set support_code = '+33' %}{% set support_number = sw[3:] %}{% elif sw.startswith('+31') %}{% set support_code = '+31' %}{% set support_number = sw[3:] %}{% elif sw.startswith('+32') %}{% set support_code = '+32' %}{% set support_number = sw[3:] %}{% endif %}
+<div class="card">
+  <form method="post" class="grid two">
+    <label class="full">{{ t('platform_name') }}<input name="platform_name" value="{{ settings.platform_name or 'Repair Control' }}"></label>
+    <label>{{ t('platform_language') }}
+      <select name="platform_language">
+        <option value="en" {% if (settings.platform_language or 'en') == 'en' %}selected{% endif %}>English</option>
+        <option value="fr" {% if settings.platform_language == 'fr' %}selected{% endif %}>Français</option>
+        <option value="nl" {% if settings.platform_language == 'nl' %}selected{% endif %}>Nederlands</option>
+      </select>
+    </label>
+    <label>{{ t('primary_color') }}<input type="color" name="theme_primary" value="{{ settings.theme_primary or '#38bdf8' }}"></label>
+    <label>{{ t('accent_color') }}<input type="color" name="theme_accent" value="{{ settings.theme_accent or '#0f172a' }}"></label>
+    <label class="full checkline"><input type="checkbox" name="support_enabled" {% if settings.support_enabled %}checked{% endif %}> {{ t('enable_support_chat') }}</label>
+    <label>{{ t('support_whatsapp') }}
+      <div class="phone-row">
+        <select name="support_whatsapp_code">
+          <option value="+32" {% if support_code == '+32' %}selected{% endif %}>+32 Belgium</option>
+          <option value="+33" {% if support_code == '+33' %}selected{% endif %}>+33 France</option>
+          <option value="+31" {% if support_code == '+31' %}selected{% endif %}>+31 Netherlands</option>
+          <option value="other">Other</option>
+        </select>
+        <input name="support_whatsapp" value="{{ support_number }}">
+      </div>
+    </label>
+    <label>{{ t('support_message') }}<input name="support_message" value="{{ settings.support_message or '' }}"></label>
+    <label>{{ t('invoice_title') }}<input name="invoice_title" value="{{ settings.invoice_title or 'Repair Invoice' }}"></label>
+    <label>{{ t('invoice_line_label') }}<input name="invoice_line_label" value="{{ settings.invoice_line_label or 'Problem Description' }}"></label>
+    <label>{{ t('qr_caption') }}<input name="qr_caption" value="{{ settings.qr_caption or 'Scan for status' }}"></label>
+    <label class="full checkline"><input type="checkbox" name="show_public_status_url" {% if settings.show_public_status_url %}checked{% endif %}> {{ t('show_public_status_url') }}</label>
+    <label class="full">{{ t('support_embed_code') }}<textarea name="support_embed_code">{{ settings.support_embed_code or '' }}</textarea></label>
+    <label class="full">{{ t('custom_css') }}<textarea name="support_custom_css">{{ settings.support_custom_css or '' }}</textarea></label>
+    <h3 class="full">Header / Navigation Labels</h3>
+    <label>{{ t('dashboard') }}<input name="menu_dashboard" value="{{ settings.menu_dashboard or 'Dashboard' }}"></label>
+    <label>{{ t('customers') }}<input name="menu_customers" value="{{ settings.menu_customers or 'Customers' }}"></label>
+    <label>{{ t('parts') }}<input name="menu_parts" value="{{ settings.menu_parts or 'Parts' }}"></label>
+    <label>{{ t('repairs') }}<input name="menu_repairs" value="{{ settings.menu_repairs or 'Repairs' }}"></label>
+    <label>GSM<input name="menu_buying" value="{{ settings.menu_buying or 'GSM' }}"></label>
+    <label>{{ t('reports') }}<input name="menu_reports" value="{{ settings.menu_reports or 'Reports' }}"></label>
+    <label>{{ t('audit_log') }}<input name="menu_audit_log" value="{{ settings.menu_audit_log or 'Audit Log' }}"></label>
+    <label>{{ t('users') }}<input name="menu_users" value="{{ settings.menu_users or 'Users' }}"></label>
+    <label>{{ t('settings') }}<input name="menu_settings" value="{{ settings.menu_settings or 'Settings' }}"></label>
+    <label>{{ t('data_manager') }}<input name="menu_data_manager" value="{{ settings.menu_data_manager or 'Data Manager' }}"></label>
+    <label>{{ t('profile') }}<input name="menu_profile" value="{{ settings.menu_profile or 'Profile' }}"></label>
+    <label>{{ t('logout') }}<input name="menu_logout" value="{{ settings.menu_logout or 'Logout' }}"></label>
+    <label>Companies<input name="menu_companies" value="{{ settings.menu_companies or 'Companies' }}"></label>
+    <label>Status Manager<input name="menu_status_manager" value="{{ settings.menu_status_manager or 'Status Manager' }}"></label>
+    <label>Payment Methods<input name="menu_payment_methods" value="{{ settings.menu_payment_methods or 'Payment Methods' }}"></label>
+    <label>Master Settings<input name="menu_master_settings" value="{{ settings.menu_master_settings or 'Master Settings' }}"></label>
+    <h3 class="full">Dashboard Labels</h3>
+    <label>Repairs Card<input name="label_repairs_count" value="{{ settings.label_repairs_count or 'Repairs' }}"></label>
+    <label>Customers Card<input name="label_customers_count" value="{{ settings.label_customers_count or 'Customers' }}"></label>
+    <label>Parts Card<input name="label_parts_count" value="{{ settings.label_parts_count or 'Parts' }}"></label>
+    <label>Users Card<input name="label_users_count" value="{{ settings.label_users_count or 'Users' }}"></label>
+    <label>Low Stock Card<input name="label_low_stock" value="{{ settings.label_low_stock or 'Low Stock' }}"></label>
+    <label>Overdue Repairs Card<input name="label_overdue_repairs" value="{{ settings.label_overdue_repairs or 'Overdue Repairs' }}"></label>
+    <label>Today's Repairs Card<input name="label_todays_repairs" value="{{ settings.label_todays_repairs or "Today's repairs" }}"></label>
+    <label class="full">Search Placeholder<input name="label_search_placeholder" value="{{ settings.label_search_placeholder or 'Search by phone / repair ID / serial / IMEI / customer' }}"></label>
+    <label>Recent Payments Title<input name="label_recent_payments" value="{{ settings.label_recent_payments or 'Recent payments' }}"></label>
+    <label>Recent Activity Title<input name="label_recent_activity" value="{{ settings.label_recent_activity or 'Recent activity' }}"></label>
+    <label>Recent Repairs Title<input name="label_recent_repairs" value="{{ settings.label_recent_repairs or 'Recent Repairs' }}"></label>
+    <label>Repair Code Header<input name="label_repair_code" value="{{ settings.label_repair_code or 'Repair Code' }}"></label>
+    <label>Customer Header<input name="label_customer" value="{{ settings.label_customer or 'Customer' }}"></label>
+    <label>Device Header<input name="label_device" value="{{ settings.label_device or 'Device' }}"></label>
+    <label>Status Header<input name="label_status" value="{{ settings.label_status or 'Status' }}"></label>
+    <h3 class="full">GSM Status Labels</h3>
+    <label>GSM Bought Status<input name="gsm_bought_status_label" value="{{ settings.gsm_bought_status_label or 'BOUGHT BY SMP' }}"></label>
+    <label>GSM Sold Status<input name="gsm_sold_status_label" value="{{ settings.gsm_sold_status_label or 'SOLD BY SMP' }}"></label>
+    <label>Action Header<input name="label_action" value="{{ settings.label_action or 'Action' }}"></label>
+    <label>Open Button Label<input name="label_open" value="{{ settings.label_open or 'Open' }}"></label>
+    <div class="full"><button type="submit">{{ t('save_settings') }}</button></div>
+  </form>
+</div>
+{% endblock %}

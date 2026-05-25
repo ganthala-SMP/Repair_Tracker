@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ t('parts') }}</h1>
+<div class="grid two">
+  <div class="card">
+    <h2>{{ t('add_part') }}</h2>
+    <form method="post" class="grid one">
+      <label>{{ t('part_name') }}<input name="name" required></label>
+      <label>{{ t('compatible_model') }}<input name="compatible_model"></label>
+      <label>{{ t('quantity') }}<input name="quantity" type="number" min="0" value="0"></label>
+      <label>{{ t('selling_price') }}<input name="selling_price" type="number" step="0.01" value="0"></label>
+      <label>{{ t('low_stock') }}<input name="low_stock_limit" type="number" min="0" value="0"></label>
+      <button type="submit">{{ t('save_part') }}</button>
+    </form>
+  </div>
+  <div class="card">
+    {% if current_user.role == 'Company Admin' %}
+    <div class="toolbar-row">
+      <a class="button secondary small" href="{{ url_for('import_template', kind='parts') }}">Download CSV template</a>
+    </div>
+    <form method="post" action="{{ url_for('import_parts') }}" enctype="multipart/form-data" class="import-form">
+      <input type="file" name="file" accept=".csv" required>
+      <button type="submit" class="small">Import Parts</button>
+    </form>
+    {% endif %}
+    <h2>{{ t('part_list') }}</h2>
+    <table>
+      <tr><th>{{ t('name') }}</th><th>{{ t('compatible_model') }}</th><th>{{ t('qty') }}</th><th>{{ t('price') }}</th></tr>
+      {% for part in parts %}
+      <tr><td>{{ part.name }}</td><td>{{ part.compatible_model }}</td><td>{{ part.quantity }}</td><td>€ {{ '%.2f'|format(part.selling_price or 0) }}</td></tr>
+      {% else %}
+      <tr><td colspan="4">{{ t('no_parts_yet') }}</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}

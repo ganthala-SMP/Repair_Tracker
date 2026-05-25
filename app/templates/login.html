@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card narrow">
+  <h1>{{ t('login') }}</h1>
+  <form method="post" class="grid one">
+    <label>{{ t('email') }}
+      <input type="email" name="email" required>
+    </label>
+    <label>{{ t('password') }}
+      <input type="password" name="password" required>
+    </label>
+    <button type="submit">{{ t('login') }}</button>
+  </form>
+</div>
+{% endblock %}

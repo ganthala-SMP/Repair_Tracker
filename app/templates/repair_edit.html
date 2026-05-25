@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Edit Repair {{ repair.repair_code }}</h1>
+<div class="card">
+  <form method="post">
+    <div class="grid two">
+      <label>{{ t('customer_name') }}<input name="customer_name" value="{{ repair.customer.name }}" required></label>
+      {% set cp = repair.customer.phone or '' %}
+      {% set selected_code = '+32' %}
+      {% set number_value = '' %}
+      {% if cp.startswith('+33') %}{% set selected_code = '+33' %}{% set number_value = cp[3:] %}{% elif cp.startswith('+31') %}{% set selected_code = '+31' %}{% set number_value = cp[3:] %}{% elif cp.startswith('+32') %}{% set selected_code = '+32' %}{% set number_value = cp[3:] %}{% endif %}
+      <label>{{ t('customer_phone') }}
+        <div class="phone-row">
+          <select name="customer_phone_code">
+            <option value="+32" {% if selected_code == '+32' %}selected{% endif %}>+32 Belgium</option>
+            <option value="+33" {% if selected_code == '+33' %}selected{% endif %}>+33 France</option>
+            <option value="+31" {% if selected_code == '+31' %}selected{% endif %}>+31 Netherlands</option>
+            <option value="other">Other</option>
+          </select>
+          <input name="customer_phone" value="{{ number_value }}" placeholder="" autocomplete="off">
+        </div>
+      </label>
+      <label>{{ t('customer_email') }}<input name="customer_email" type="email" value="{{ repair.customer.email or '' }}"></label>
+      <label>Date<input name="due_date" type="date" value="{{ repair.due_date.strftime('%Y-%m-%d') if repair.due_date else '' }}"></label>
+      <label>{{ t('status') }}<select name="status">{% for status in statuses %}<option value="{{ status }}" {% if repair.status == status %}selected{% endif %}>{{ status_label(status) }}</option>{% endfor %}</select></label>
+      <label>{{ t('deposit') }}<input name="deposit_amount" type="number" step="0.01" value="{{ repair.deposit_amount if repair.deposit_amount else '' }}"></label>
+      <label class="full">Customer Note<textarea name="customer_note">{{ repair.customer_note or '' }}</textarea></label>
+    </div>
+
+    <h3>Devices</h3>
+    <div id="repair-items" class="dynamic-items">
+      {% for item in items %}
+      <div class="repair-item-row">
+        <label>Brand<input name="repair_item_brand[]" value="{{ item.brand }}" required></label>
+        <label>Model<input name="repair_item_model[]" value="{{ item.model }}" required></label>
+        <label>IMEI<input name="repair_item_imei[]" value="{{ item.imei }}"></label>
+        <label>Serial<input name="repair_item_serial[]" value="{{ item.serial }}"></label>
+        <label class="wide">Issue Description<textarea name="repair_item_issue[]" required>{{ item.issue }}</textarea></label>
+        <label>Price<input name="repair_item_amount[]" type="number" step="0.01" value="{{ item.amount if item.amount else '' }}"></label>
+        <button type="button" class="small danger remove-repair-item">Remove</button>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="full actions-inline">
+      <button type="button" class="secondary" id="add-repair-item">+ Add Device</button>
+      <button type="submit">Save Repair</button>
+      <a class="button secondary" href="{{ url_for('repair_detail', repair_id=repair.id) }}">Cancel</a>
+    </div>
+  </form>
+</div>
+<script>
+(function(){
+  const container = document.getElementById('repair-items');
+  const addBtn = document.getElementById('add-repair-item');
+  function bindRemove(btn){ btn.addEventListener('click', function(){ if(container.children.length > 1){ btn.closest('.repair-item-row').remove(); } }); }
+  container.querySelectorAll('.remove-repair-item').forEach(bindRemove);
+  addBtn.addEventListener('click', function(){
+    const row = container.children[0].cloneNode(true);
+    row.querySelectorAll('input, textarea').forEach(el => { el.value = ''; });
+    bindRemove(row.querySelector('.remove-repair-item'));
+    container.appendChild(row);
+  });
+})();
+</script>
+{% endblock %}
