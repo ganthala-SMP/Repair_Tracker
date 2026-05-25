@@ -1,7 +1,7 @@
 # Repair Control - Multi Company
 
 ## Default super admin login
-- Email: `info@starmobileparts.be`
+- Email: `ganthala@starmobileparts.be`
 - Password: `SMP@2000`
 
 Change this immediately after first login.
